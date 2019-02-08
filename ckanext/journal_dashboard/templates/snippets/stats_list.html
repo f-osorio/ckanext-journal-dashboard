@@ -6,13 +6,38 @@
         organization - dict of metadata for the organization
 #}
 {% set downloads = h.journal_resource_downloads(organization['id']) %}
+{% resource 'journal-dashboard/dashboard.css' %}
 <h1>
     Stats go here
 </h1>
 <ul>
     {% for package in organization['packages'] %}
-        <li><strong><a href='/dataset/{{ package["name"] }}'>{{ package['title']|truncate(35) }}</a></strong></li>
-        Views: {{ h.package_tracking(package['id']) }}
+        {% set pack_stat = h.package_tracking(package['id']) %}
+        {#<li><strong><a href='/dataset/{{ package["name"] }}'>{{ package['title']|truncate(35) }}</a></strong>
+        {% if h.is_published_(package['name']) %}
+            <span class="label label-published">{{ _('Published') }}</span>
+        {% else %}
+            <span class="label label-important">{{ _('Unpublished') }}</span>
+        {% endif %}
+        </li>#}
+
+        <li>
+            <strong>
+                <a href='/dataset/{{ package["name"] }}'>
+                     {% if h.is_published_(package['name']) %}
+                        <span class="label label-published">{{ package['title']|truncate(35) }}</span>
+                    {% else %}
+                        <span class="label label-important">{{ package['title']|truncate(35) }}</span>
+                    {% endif %}
+                </a>
+            </strong>
+        </li>
+
+        {% if pack_stat['total'] == 1 %}
+            {{ pack_stat['total'] }} View
+        {% else %}
+            {{ pack_stat['total'] }} Views
+        {% endif %}
         <ul>
         {% if package['num_resources'] > 0 %}
             {% for item in h.get_resources(package['id']) %}
@@ -25,13 +50,21 @@
                     {% endif %}
 
                     {% if item['name'] == '' %}
-                        {{ item['url'] }}</a> <a href="" target="_blank"></a>
+                        {{ item['url'] }}</a> <a href="{{ item['url'] }}" target="_blank"></a>
                     {% else %}
-                        {{ name }}</a>
-                    {% endif %}
-                    {% set stats = h.match_resource_downloads(item['url'], downloads) %}
-                    {% if stats %}
-                        Downloads: {{ stats }}
+                        {{ name }}</a>&mdash;
+                        {% set stats = h.match_resource_downloads(item['url'], downloads) %}
+                        {% if stats %}
+                            {{ stats[0] }}
+                            {% if stats[0] > 1%}
+                                Downloads
+                            {% else %}
+                                Download
+                            {% endif %}
+                        {% else %}
+                            0 Downloads
+                        {% endif %}
+
                     {% endif %}
                 </li>
 

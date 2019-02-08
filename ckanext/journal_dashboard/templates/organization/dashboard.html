@@ -5,8 +5,11 @@
 
 {% block breadcrumb_content %}
     {{ super() }}
-    <li class="active">
+    <li>
         <a href="/journals/{{ organization.name }}">{{ organization.display_name }}</a>
+    </li>
+    <li class="active">
+        <a href="/journals/{{ organization.name }}/stats">Stats</a>
     </li>
 {% endblock %}
 

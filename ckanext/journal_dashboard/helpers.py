@@ -1,4 +1,5 @@
 import ckan.model as model
+from urlparse import urlparse
 from ckan.common import request
 import ckan.plugins.toolkit as tk
 
@@ -48,8 +49,8 @@ def resource_details(id):
 def journal_resource_downloads(journal_id):
     return_dict = {}
     sql = """
-        select r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url
-        from package as p
+        SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url
+        FROM package as p
         JOIN resource as r
             ON r.package_id = p.id
         JOIN tracking_summary as ts
@@ -66,3 +67,25 @@ def match_resource_downloads(url, stats):
     for k,v in stats.items():
         if url in k:
             return v
+
+
+def is_published_(name):
+    try:
+        pck = tk.get_action('package_show')(None, {'id': name})
+        if is_private(pck) or in_review(pck) != 'reviewed':
+            return False
+        return True
+    except Exception as e:
+        return False
+
+
+def in_review(pkg):
+    if not isinstance(pkg, dict):
+        return False
+    return pkg.get('dara_edawax_review', False)
+
+
+def is_private(pkg):
+    if not isinstance(pkg, dict):
+        return True
+    return pkg.get('private', True)

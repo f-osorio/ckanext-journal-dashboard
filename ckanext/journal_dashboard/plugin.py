@@ -6,10 +6,10 @@ import helpers
 """
 TODO:
     * Finish arranging data
-    * Add badges for unpublished/published
+    X Add badges for unpublished/published
     * Make sortable
     * Rearrange data (tables?)
-    * Double checkout how 'Total Views' is being created
+    * Double check how 'Total Views' is being created
             * doesn't seem to match what the individual views are
     * Visualization?
     *
@@ -46,7 +46,8 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
                 'resource_details': helpers.resource_details,
                 'package_tracking': helpers.package_tracking,
                 'journal_resource_downloads': helpers.journal_resource_downloads,
-                'match_resource_downloads': helpers.match_resource_downloads
+                'match_resource_downloads': helpers.match_resource_downloads,
+                'is_published_': helpers.is_published_,
         }
 
 
