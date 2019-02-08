@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block content_primary_nav %}
+    {{ super() }}
+    {% if h.check_access('dashboard_read') %}
+        {{ h.build_nav_icon('journal_stats', _('Stats'), id=c.group_dict.name) }}
+    {% endif %}
+{% endblock %}

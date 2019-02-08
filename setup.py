@@ -78,6 +78,6 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
         [ckan.plugins]
-        journal-dashboard=ckanext.journal-dashboard.plugin:Journal-DashboardPlugin
+        journal-dashboard=ckanext.journal_dashboard.plugin:Journal_DashboardPlugin
     ''',
 )

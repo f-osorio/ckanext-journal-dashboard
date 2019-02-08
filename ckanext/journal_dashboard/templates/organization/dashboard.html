@@ -1,0 +1,72 @@
+{% extends "organization/read_base.html" %}
+{% set organization = h.get_org(id) %}
+
+
+
+{% block breadcrumb_content %}
+    {{ super() }}
+    <li class="active">
+        <a href="/journals/{{ organization.name }}">{{ organization.display_name }}</a>
+    </li>
+{% endblock %}
+
+
+{% block content_action %}{% endblock %}
+
+
+{% block secondary_content %}
+    {% set pkg = h.dara_pkg() %}
+    {% with truncate=truncate or 0, url=h.url_for(controller="organization", action="read", id=organization.id) %}
+        <div class="module context-info">
+            <section class="module-content">
+                <div class="image">
+                    <a href="{{ url }}">
+                        <img src="{{ organization.image_display or h.url_for_static('/base/images/placeholder-organization.png') }}" width="200" alt="" />
+                    </a>
+                </div>
+                <h1 class="heading">
+                    {{ id }}
+                </h1>
+                {% if organization.description %}
+                    <p>
+                        {{ h.markdown_extract(organization.description, 180) }}
+                        {% link_for _('read more'), controller='organization', action='about', id=organization.name %}
+                    </p>
+                {% else %}
+                    <p class="empty">{{ _('There is no description for this organization') }}</p>
+                {% endif %}
+
+                <div class="nums">
+                    {% if pkg is none %}
+                    <dl>
+                        <dt>{{ _('Datasets') }}</dt>
+                        <dd>{{ h.SI_number_span(organization.package_count) }}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{{ _('Followers') }}</dt>
+                        <dd>{{ h.SI_number_span(organization.num_followers) }}</dd>
+                    </dl>
+                    {% endif %}
+                    <dl>
+                        <dt>{{ _('Total Views') }}</dt>
+                        <dd>{{ h.SI_number_span(h.journal_total_views(organization)) }}</dd>
+                    </dl>
+
+                    <dl>
+                        <dt>{{ _('Total Downloads') }}</dt>
+                        <dd>TODO</dd>
+                    </dl>
+
+                </div>
+
+            </section>
+        </div>
+    {% endwith %}
+{% endblock %}
+
+{% block primary_content_inner %}
+    <h2 class="search-form">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
+    {% block packages_list %}
+        {{ h.snippet('snippets/stats_list.html', organization=organization) }}
+    {% endblock %}
+{% endblock %}
