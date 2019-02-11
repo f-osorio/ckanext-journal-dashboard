@@ -48,6 +48,8 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
                 'journal_resource_downloads': helpers.journal_resource_downloads,
                 'match_resource_downloads': helpers.match_resource_downloads,
                 'is_published_': helpers.is_published_,
+                'total_views_across_journal_datasets': helpers.total_views_across_journal_datasets,
+                'total_downloads_journal': helpers.total_downloads_journal,
         }
 
 

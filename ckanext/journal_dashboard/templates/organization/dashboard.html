@@ -52,12 +52,12 @@
                     {% endif %}
                     <dl>
                         <dt>{{ _('Total Views') }}</dt>
-                        <dd>{{ h.SI_number_span(h.journal_total_views(organization)) }}</dd>
+                        <dd>{{ h.total_views_across_journal_datasets(organization['id']) }}</dd>
                     </dl>
 
                     <dl>
                         <dt>{{ _('Total Downloads') }}</dt>
-                        <dd>TODO</dd>
+                        <dd>{{ h.total_downloads_journal(organization['id']) }}</dd>
                     </dl>
 
                 </div>

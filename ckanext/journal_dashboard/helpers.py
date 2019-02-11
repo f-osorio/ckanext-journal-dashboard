@@ -89,3 +89,28 @@ def is_private(pkg):
     if not isinstance(pkg, dict):
         return True
     return pkg.get('private', True)
+
+
+def total_views_across_journal_datasets(journal_id):
+    sql = """
+            SELECT g.id, SUM(ts.count)
+            FROM "group" as g
+            JOIN package as p
+                ON g.id = p.owner_org
+            JOIN tracking_summary as ts
+                ON ts.package_id = p.id
+            WHERE p.state = 'active'
+                AND p.owner_org = %(id)s
+            GROUP BY g.id;
+        """
+
+    results = engine.execute(sql, id=journal_id).fetchall()
+    return results[0][1]
+
+
+def total_downloads_journal(journal_id):
+    data = journal_resource_downloads(journal_id)
+    total = 0
+    for k,v in data.items():
+        total += v[0]
+    return total
