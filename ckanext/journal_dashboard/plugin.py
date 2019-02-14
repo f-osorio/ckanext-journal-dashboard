@@ -9,7 +9,7 @@ TODO:
     X Add badges for unpublished/published
     * Make sortable
     * Rearrange data (tables?)
-    * Double check how 'Total Views' is being created
+    X Double check how 'Total Views' is being created
             * doesn't seem to match what the individual views are
     * Visualization?
     *
@@ -35,7 +35,7 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
         """ Auth function for new page """
         # Include check_access('dashboard_read') in route to page
         return {
-                'dashboard_read': helpers.dashboard_read
+                'dashboard_read': helpers.dashboard_read,
         }
 
     def get_helpers(self):
@@ -59,6 +59,7 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
         """
         map.connect('journal_stats','/journals/{id}/stats',
                      controller='ckanext.journal_dashboard.controller:DashBoardController',
-                     action='dash_show',
+                     action='dashboard_read',
                      ckan_icon='bar-chart')
+
         return map

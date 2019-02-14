@@ -19,7 +19,8 @@ def dashboard_read(context, data_dict=None):
     if user['sysadmin']:
         return {'success': True}
 
-    return {'success': False, 'msg': "Not authorized to view page."}
+    return {'success': False,
+            'msg': "Not authorized to view page."}
 
 
 def get_org(id):
