@@ -1,9 +1,19 @@
+from pylons import config
 import ckan.model as model
 from urlparse import urlparse
 from ckan.common import request
 import ckan.plugins.toolkit as tk
 
+
 engine = model.meta.engine
+
+
+def is_dataset(url):
+    """ Is url for for a dataset or an external url? """
+    local = config.get('ckan.site_url')
+    if local in url:
+        return True
+    return False
 
 
 def dashboard_read(context, data_dict=None):
@@ -39,7 +49,8 @@ def package_tracking(id):
 
 def get_resources(id):
     resources = tk.get_action('package_show')(None, {'id': id})['resources']
-    return resources
+    # return list sorted so url resources are after data resources
+    return sorted(resources, key=lambda k: k['url'])
 
 
 def resource_details(id):
@@ -50,7 +61,7 @@ def resource_details(id):
 def journal_resource_downloads(journal_id):
     return_dict = {}
     sql = """
-        SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url
+        SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
         FROM package as p
         JOIN resource as r
             ON r.package_id = p.id
@@ -60,7 +71,7 @@ def journal_resource_downloads(journal_id):
         """
     results = engine.execute(sql, id=journal_id).fetchall()
     for result in results:
-        return_dict[result[1]] = [result[2], result[3]]
+        return_dict[result[1]] = [result[2], result[3], result[6]]
     return return_dict
 
 
@@ -68,6 +79,26 @@ def match_resource_downloads(url, stats):
     for k,v in stats.items():
         if url in k:
             return v
+
+
+def journal_download_summary(id, package):
+    return_dict = {}
+    sql = """
+        SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
+        FROM package as p
+        JOIN resource as r
+            ON r.package_id = p.id
+        JOIN tracking_summary as ts
+            ON ts.url = r.url
+        WHERE p.owner_org = %(id)s;
+        """
+    results = engine.execute(sql, id=journal_id).fetchall()
+    package_resources = get_resources(package)
+    for result in results:
+        return_dict[result[0]] = {'url': result[1], 'total': result[2],
+                                  'recent': result[3], 'format': result[5]}
+    return return_dict
+
 
 
 def is_published_(name):

@@ -69,7 +69,40 @@
 
 {% block primary_content_inner %}
     <h2 class="search-form">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
+
     {% block packages_list %}
         {{ h.snippet('snippets/stats_list.html', organization=organization) }}
     {% endblock %}
+
+    <script>
+        function sort_list(){
+            var list = document.getElementById('dashboard_list');
+            var new_list = list.cloneNode(false);
+            var items = [];
+
+            for (var i=list.childNodes.length; i--;){
+                if (list.childNodes[i].nodeName==='SPAN'){
+                    items.push(list.childNodes[i]);
+                }
+            }
+
+            items.sort(function(a,b){
+                    //console.log(a.childNodes[1].childNodes[3].innerHTML);
+                    return b.childNodes[1].childNodes[3].innerHTML.localeCompare(a.childNodes[1].childNodes[3].innerHTML, undefined,{numeric:true});
+                }
+            );
+
+            //
+            for(var i=0; i< items.length; i++){
+                new_list.appendChild(items[i]);
+            }
+            list.parentNode.replaceChild(new_list, list);
+        }
+
+        sort_list();
+
+
+    </script>
 {% endblock %}
+
+

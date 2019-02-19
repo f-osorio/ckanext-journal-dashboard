@@ -24,7 +24,6 @@ class DashBoardController(base.BaseController):
 
             return base.render('organization/dashboard.html', extra_vars={'id': id})
         except logic.NotAuthorized as e:
-            #base.abort(401, _('Not authorized to access this page'))
             url_parts = request.url.split('/')
             journal_id = url_parts[-2]
             h.flash_error("You don't have access to view this page.")

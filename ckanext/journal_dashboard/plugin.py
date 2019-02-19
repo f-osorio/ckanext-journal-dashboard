@@ -7,7 +7,7 @@ import helpers
 TODO:
     * Finish arranging data
     X Add badges for unpublished/published
-    * Make sortable
+    X Make sortable (not necessary)
     * Rearrange data (tables?)
     X Double check how 'Total Views' is being created
             * doesn't seem to match what the individual views are
@@ -50,6 +50,8 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
                 'is_published_': helpers.is_published_,
                 'total_views_across_journal_datasets': helpers.total_views_across_journal_datasets,
                 'total_downloads_journal': helpers.total_downloads_journal,
+                'is_dataset': helpers.is_dataset,
+                'journal_download_summary': helpers.journal_download_summary,
         }
 
 

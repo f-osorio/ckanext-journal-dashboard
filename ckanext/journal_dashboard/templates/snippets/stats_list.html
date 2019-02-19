@@ -10,18 +10,11 @@
 <h1>
     Stats go here
 </h1>
-<ul>
-    {% for package in organization['packages'] %}
-        {% set pack_stat = h.package_tracking(package['id']) %}
-        {#<li><strong><a href='/dataset/{{ package["name"] }}'>{{ package['title']|truncate(35) }}</a></strong>
-        {% if h.is_published_(package['name']) %}
-            <span class="label label-published">{{ _('Published') }}</span>
-        {% else %}
-            <span class="label label-important">{{ _('Unpublished') }}</span>
-        {% endif %}
-        </li>#}
 
-        <li>
+<ul id="dashboard_list">
+    {% for package in organization['packages'] %}
+        <span class="item">
+        <li style="margin-top: 10px;">
             <strong>
                 <a href='/dataset/{{ package["name"] }}'>
                      {% if h.is_published_(package['name']) %}
@@ -31,32 +24,52 @@
                     {% endif %}
                 </a>
             </strong>
+            &nbsp;&nbsp;&nbsp;
+            <span class="views">
+                {% if pack_stat['total'] == 1 %}
+                    {{ pack_stat['total'] }} View
+                {% else %}
+                    {{ pack_stat['total'] }} Views
+                {% endif %}
+            </span>
         </li>
-
-        {% if pack_stat['total'] == 1 %}
-            {{ pack_stat['total'] }} View
-        {% else %}
-            {{ pack_stat['total'] }} Views
-        {% endif %}
         <ul>
         {% if package['num_resources'] > 0 %}
+            {% set downloads = h.journal_download_summary(organization['id'], package['id']) %}
             {% for item in h.get_resources(package['id']) %}
-                <li>
-                    <a href="/dataset/{{ item['package_id'] }}/resource/{{ item['id'] }}">
-                    {% if item['name']|length > 40 %}
-                        {% set name = [item['name'][:20], item['name'][-20:]]|join('...') %}
-                    {% else %}
-                        {% set name = item['name'] %}
-                    {% endif %}
+                {% if item['name']|length > 21 %}
+                    {% set name = [item['name'][:9], item['name'][-9:]]|join('...') %}
+                {% else %}
+                    {% set name = item['name'] %}
+                {% endif %}
 
-                    {% if item['name'] == '' %}
-                        {{ item['url'] }}</a> <a href="{{ item['url'] }}" target="_blank"></a>
+                {% if item['url']|length > 21 %}
+                    {% set url =[item['url'][:10],item['url'][-10:]]|join('.') %}
+                {% else %}
+                    {% set url = item['url'] %}
+                {% endif %}
+
+                {% if name|length < 1 %}
+                    {% set spaces = "&nbsp;"* (20 - url|length) %}
+                {% else %}
+                    {% set spaces = "&nbsp;"* (20 - name|length) %}
+                {% endif %}
+
+                <li class="list_item">{{ spaces|safe }}
+                    <a href="/dataset/{{ item['package_id'] }}/resource/{{ item['id'] }}">
+                    {% if not h.is_dataset(item['url']) %}
+                        {% if name != '' %}
+                            {{ name }}
+                        {% else %}
+                            {{ url }}
+                        {% endif %}
+                        </a> <a href="{{ item['url'] }}" target="_blank"></a>
                     {% else %}
-                        {{ name }}</a>&mdash;
+                        {{ name }}</a> &mdash;
                         {% set stats = h.match_resource_downloads(item['url'], downloads) %}
                         {% if stats %}
                             {{ stats[0] }}
-                            {% if stats[0] > 1%}
+                            {% if stats[0] > 1 %}
                                 Downloads
                             {% else %}
                                 Download
@@ -73,5 +86,6 @@
             <li>0 Resources</li>
         {% endif %}
         </ul>
+        </span>
     {% endfor %}
 </ul>
