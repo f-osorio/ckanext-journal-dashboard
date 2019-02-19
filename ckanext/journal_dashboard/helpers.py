@@ -8,14 +8,6 @@ import ckan.plugins.toolkit as tk
 engine = model.meta.engine
 
 
-def is_dataset(url):
-    """ Is url for for a dataset or an external url? """
-    local = config.get('ckan.site_url')
-    if local in url:
-        return True
-    return False
-
-
 def dashboard_read(context, data_dict=None):
     """ Only administrators should have access """
     user_id = context['auth_user_obj'].id
@@ -75,11 +67,6 @@ def journal_resource_downloads(journal_id):
     return return_dict
 
 
-def match_resource_downloads(url, stats):
-    for k,v in stats.items():
-        if url in k:
-            return v
-
 
 def journal_download_summary(id, package):
     return_dict = {}
@@ -92,11 +79,16 @@ def journal_download_summary(id, package):
             ON ts.url = r.url
         WHERE p.owner_org = %(id)s;
         """
-    results = engine.execute(sql, id=journal_id).fetchall()
+    results = engine.execute(sql, id=id).fetchall()
     package_resources = get_resources(package)
-    for result in results:
-        return_dict[result[0]] = {'url': result[1], 'total': result[2],
-                                  'recent': result[3], 'format': result[5]}
+    match = False
+    for item in package_resources:
+        if item['id'] in [result[0] for result in results]:
+            for result in results:
+                if item['id'] == result[0]:
+                    return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': result[2], 'recent': result[3]}
+        else:
+            return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': "0"}
     return return_dict
 
 
