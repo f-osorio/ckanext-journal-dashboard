@@ -7,14 +7,8 @@ import helpers
 TODO:
     * Finish arranging data
     X Add badges for unpublished/published
-    X Make sortable (not necessary)
     * Rearrange data (tables?)
-    X Double check how 'Total Views' is being created
-            * doesn't seem to match what the individual views are
     * Visualization?
-    *
-    *
-    *
 """
 
 class Journal_DashboardPlugin(plugins.SingletonPlugin):

@@ -3,6 +3,7 @@ import ckan.model as model
 from urlparse import urlparse
 from ckan.common import request
 import ckan.plugins.toolkit as tk
+from collections import OrderedDict
 
 
 engine = model.meta.engine
@@ -69,7 +70,7 @@ def journal_resource_downloads(journal_id):
 
 
 def journal_download_summary(id, package):
-    return_dict = {}
+    return_dict = OrderedDict()
     sql = """
         SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
         FROM package as p
@@ -89,7 +90,9 @@ def journal_download_summary(id, package):
                     return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': result[2], 'recent': result[3]}
         else:
             return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': "0"}
-    return return_dict
+
+    # sort values based on total
+    return OrderedDict(sorted(return_dict.items(),key=lambda x: x[1]['total']))
 
 
 
