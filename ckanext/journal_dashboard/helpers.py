@@ -1,7 +1,7 @@
 from pylons import config
 import ckan.model as model
 from urlparse import urlparse
-from ckan.common import request
+from ckan.common import request, c
 import ckan.plugins.toolkit as tk
 from collections import OrderedDict
 
@@ -31,7 +31,12 @@ def get_org(id):
                 'id': id,
                 'include_datasets': True
             }
-    org = tk.get_action('organization_show')(None, data)
+    try:
+        org = tk.get_action('organization_show')(None, data)
+    except:
+        context = {'user': 'default'}
+        org = tk.get_action('organization_show')(context, data)
+
     return org
 
 

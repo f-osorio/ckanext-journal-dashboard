@@ -8,6 +8,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+
 setup(
     name='''ckanext-journal-dashboard''',
 
@@ -77,7 +78,17 @@ setup(
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
-        [ckan.plugins]
-        journal-dashboard=ckanext.journal_dashboard.plugin:Journal_DashboardPlugin
-    ''',
+    [paste.paster_command]
+    report=ckanext.journal_dashboard.command:JournalSummaryReport
+
+    [ckan.plugins]
+    journal-dashboard=ckanext.journal_dashboard.plugin:Journal_DashboardPlugin
+    '''
 )
+
+"""
+'''
+[ckan.plugins]
+journal-dashboard=ckanext.journal_dashboard.plugin:Journal_DashboardPlugin
+'''
+"""
