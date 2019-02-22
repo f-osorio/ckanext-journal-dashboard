@@ -1,0 +1,175 @@
+<style>
+tr, td {
+    padding-left: 15px;
+    text-align: center;
+}
+
+.label-published{
+    background: green;
+}
+
+.label-important{
+    background: #e0051e;
+}
+
+.list_item{
+    font-family: monospace;
+    list-style-type: none;
+}
+
+a[target="_blank"]:after {
+    content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
+    margin: 0 0 0 5px;
+}
+
+#body{
+    margin-left: 25%;
+    margin-right: 25%;
+}
+
+.label {
+  display: inline-block;
+  padding: 2px 4px;
+  font-size: 11.844px;
+  font-weight: bold;
+  line-height: 14px;
+  color: white;
+  vertical-align: baseline;
+  white-space: nowrap;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.label {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+</style>
+
+<div id="body">
+    <h1>Access Summary for "{{ journal }}"</h1>
+
+    <table>
+        <tr>
+            <td>Datasets:</td>
+            <td>Total Views:</td>
+            <td>Total Downloads:</td>
+        </tr>
+        <tr>
+            <td>{{ datasets }}</td>
+            <td>{{ total_views }}</td>
+            <td>{{ total_downloads }}</td>
+        </tr>
+    </table>
+
+    <ul id="dashboard_list">
+        {%- for package in organization['packages'] -%}
+            <span class="item">
+            <li style="margin-top: 10px;">
+                <strong>
+                    <a href='/dataset/{{ package["name"] }}'>
+                        {%- if is_published(package['name']) -%}
+                            <span class="label label-published">{{ package['title']|truncate(35) }}</span>
+                        {%- else -%}
+                            <span class="label label-important">{{ package['title']|truncate(35) }}</span>
+                        {%- endif -%}
+                    </a>
+                </strong>
+                &nbsp;&nbsp;&nbsp;
+                <span class="views">
+                    {%- set pack_stat = package_tracking(package['id']) -%}
+                    {%- if pack_stat['total'] == 1 -%}
+                        {{ pack_stat['total'] }} View
+                    {%- else -%}
+                        {{ pack_stat['total'] }} Views
+                    {%- endif -%}
+                </span>
+            </li>
+            <ul>
+                {%- if package['num_resources'] > 0 -%}
+                    {%- set summary = journal_download_summary(organization['id'], package['id']) -%}
+                    {%- for item in summary -%}
+                        {%- if summary[item]['name']|length > 21 -%}
+                            {%- set name = [summary[item]['name'][:9], summary[item]['name'][-9:]]|join('...') -%}
+                        {%- else -%}
+                            {%- set name = summary[item]['name'] -%}
+                        {%- endif -%}
+
+                        {%- if summary[item]['url']|length > 21 -%}
+                            {%- set url =[summary[item]['url'][:10],summary[item]['url'][-10:]]|join('.') -%}
+                        {%- else -%}
+                            {%- set url = summary[item]['url'] -%}
+                        {%- endif -%}
+
+                        {%- if name|length < 1 -%}
+                            {%- set spaces = "&nbsp;"* (20 - url|length) -%}
+                        {%- else -%}
+                            {%- set spaces = "&nbsp;"* (20 - name|length) -%}
+                        {%- endif -%}
+
+                        <li class="list_item">{{ spaces|safe }}
+                            <a href="/dataset/{{ summary[item]['package_id'] }}/resource/{{ summary[item]['id'] }}">
+                                {%- if summary[item]['format']|length > 0 -%}
+                                    {{ name }}</a> &mdash;
+                                    {{ summary[item]['total'] }}
+                                    {%- if summary[item]['total'] != "" -%}
+                                        {%- if summary[item]['total']|int > 1 -%}
+                                            &nbsp;Downloads
+                                        {%- else -%}
+                                            &nbsp;Download
+                                        {%- endif -%}
+                                    {%- else -%}
+                                        0 Downloads
+                                    {%- endif -%}
+                                {%- else -%}
+                                    {%- if name != '' -%}
+                                        {{ name }}
+                                    {%- else -%}
+                                        {{ url }}
+                                    {%- endif -%}
+                                    </a> <a href="{{ summary[item]['url'] }}" target="_blank"></a>
+                                {%- endif -%}
+                        </li>
+                    {%- endfor -%}
+                {%- else -%}
+                    {%- set spaces = "&nbsp;"* (20) -%}
+
+                    <li class="list_item">{{ spaces|safe }}0 Resources</li>
+                {%- endif -%}
+            </ul>
+            </span>
+        {%- endfor -%}
+    </ul>
+</div>
+
+
+<script>
+    function sort_list(){
+        var list = document.getElementById('dashboard_list');
+        var new_list = list.cloneNode(false);
+        var items = [];
+
+        for (var i=list.childNodes.length; i--;){
+            if (list.childNodes[i].nodeName==='SPAN'){
+                items.push(list.childNodes[i]);
+            }
+        }
+
+        items.sort(function(a,b){
+                //console.log(a.childNodes[1].childNodes[3].innerHTML);
+                return b.childNodes[1].childNodes[3].innerHTML.localeCompare(a.childNodes[1].childNodes[3].innerHTML, undefined,{numeric:true});
+            }
+        );
+
+        //
+        for(var i=0; i< items.length; i++){
+            new_list.appendChild(items[i]);
+        }
+        list.parentNode.replaceChild(new_list, list);
+    }
+
+    sort_list();
+
+
+</script>

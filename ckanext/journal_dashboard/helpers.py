@@ -1,9 +1,11 @@
 from pylons import config
 import ckan.model as model
 from urlparse import urlparse
-from ckan.common import request, c
 import ckan.plugins.toolkit as tk
 from collections import OrderedDict
+from ckan.common import request, c, response
+
+import jinja2
 
 
 engine = model.meta.engine
@@ -41,13 +43,21 @@ def get_org(id):
 
 
 def package_tracking(id):
-    tracking_summary = tk.get_action('package_show')(None, {'id': id, 'include_tracking': True})['tracking_summary']
+    try:
+        tracking_summary = tk.get_action('package_show')(None, {'id': id, 'include_tracking': True})['tracking_summary']
+    except TypeError:
+        context = {'user': 'default'}
+        tracking_summary = tk.get_action('package_show')(context, {'id': id, 'include_tracking': True})['tracking_summary']
     return tracking_summary
 
 
 def get_resources(id):
-    resources = tk.get_action('package_show')(None, {'id': id})['resources']
-    # return list sorted so url resources are after data resources
+    try:
+        resources = tk.get_action('package_show')(None,{'id':id})['resources']
+    except TypeError:
+        context = {'user': 'default'}
+        resources = tk.get_action('package_show')(context, {'id': id})['resources']
+
     return sorted(resources, key=lambda k: k['url'])
 
 
@@ -75,6 +85,10 @@ def journal_resource_downloads(journal_id):
 
 
 def journal_download_summary(id, package):
+    """
+        id: of owner org
+        package: id
+    """
     return_dict = OrderedDict()
     sql = """
         SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
@@ -94,27 +108,21 @@ def journal_download_summary(id, package):
                 if item['id'] == result[0]:
                     return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': result[2], 'recent': result[3]}
         else:
-            return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': "0"}
+            return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': 0}
 
     # sort values based on total
-    return OrderedDict(sorted(return_dict.items(),key=lambda x: x[1]['total']))
+    return OrderedDict(sorted(return_dict.items(),key=lambda x: x[1]['total'], reverse=True))
 
 
 
 def is_published_(name):
     try:
         pck = tk.get_action('package_show')(None, {'id': name})
-        if is_private(pck) or in_review(pck) != 'reviewed':
+        if is_private(pck):
             return False
         return True
     except Exception as e:
         return False
-
-
-def in_review(pkg):
-    if not isinstance(pkg, dict):
-        return False
-    return pkg.get('dara_edawax_review', False)
 
 
 def is_private(pkg):
@@ -146,3 +154,10 @@ def total_downloads_journal(journal_id):
     for k,v in data.items():
         total += v[0]
     return total
+
+
+def create_email(data):
+    with open('./ckanext/journal_dashboard/templates/package/email.html') as file:
+        template = jinja2.Template(file.read())
+    return template.render(data, is_published=is_published_, package_tracking=package_tracking, journal_download_summary=journal_download_summary)
+
