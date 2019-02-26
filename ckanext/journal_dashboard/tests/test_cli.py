@@ -93,7 +93,7 @@ class TestCli(helpers.FunctionalTestBase):
         return datasets
 
 
-    def _test_1_access_dataset_0_views(self):
+    def test_1_access_dataset_0_views(self):
         dataset = self._create_package_resource()
 
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
@@ -103,7 +103,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert tracking_summary['recent'] == 0, 'Recent should be 0, {}'.format(tracking_summary['recent'])
 
 
-    def _test_2_access_dataset_1_view(self):
+    def test_2_access_dataset_1_view(self):
         dataset = self._create_package_resource()
 
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
@@ -121,7 +121,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert tracking_summary['recent'] == 1, 'Recent should be 1, {}'.format(tracking_summary['recent'])
 
 
-    def _test_3_access_2_datasets_3_views(self):
+    def test_3_access_2_datasets_3_views(self):
         dataset1 = self._create_package_resource()
         dataset2 = self._create_package_resource()
 
@@ -152,7 +152,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert tracking_summary2['recent'] == 1, 'Recent should be 1, {}'.format(tracking_summary['recent'])
 
 
-    def _test_4_resource_download_1_real(self):
+    def test_4_resource_download_1_real(self):
         """ Download from 1 user """
         dataset, resources = self._create_package_resource(resource=True)
         url = resources[0]['url']
@@ -170,7 +170,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert tracking_summary['recent'] == 1, 'Recent should be 1, {}'.format(tracking_summary['recent'])
 
 
-    def _test_5_resourcs_download_1_real(self):
+    def test_5_resourcs_download_1_real(self):
         """ Download from 1 user """
         dataset1, resources1 = self._create_package_resource(resource=True)
         url1 = resources1[0]['url']
@@ -208,7 +208,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert tracking_summary3['recent'] == 1, 'Recent should be 1, {}'.format(tracking_summary3['recent'])
 
 
-    def _test_6_create_multiple_datasets(self):
+    def test_6_create_multiple_datasets(self):
         dataset, resources = self._create_package_resource(num_resources=3, resource=True)
 
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
@@ -218,7 +218,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert len(resources) == 3, "There should be 3 resources: {}".format(len(resources))
 
 
-    def _test_7_download_mulitple_resources_one_dataset(self):
+    def test_7_download_mulitple_resources_one_dataset(self):
         dataset, resources = self._create_package_resource(num_resources=3, resource=True)
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
 
@@ -252,7 +252,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert resource_summary3['total'] == 0, 'Total should be 0, {}'.format(resource_summary3['total'])
 
 
-    def _test_8_total_downloads_journal(self):
+    def test_8_total_downloads_journal(self):
         dataset, resources = self._create_package_resource(num_resources=3, resource=True)
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
 
@@ -274,7 +274,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert downloads == 3, "Should be 3 downloads: {}".format(downloads)
 
 
-    def _test_9_total_views_journal(self):
+    def test_9_total_views_journal(self):
         dataset = self._create_package_resource(num_journals=5, resource=False)
 
         package1 = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
@@ -306,7 +306,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert views == 13, "Should be 13 views: {}".format(views)
 
 
-    def _test_10_count_datasets_in_journal(self):
+    def test_10_count_datasets_in_journal(self):
         dataset = self._create_package_resource(num_journals=13,resource=False)
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
 
@@ -315,7 +315,7 @@ class TestCli(helpers.FunctionalTestBase):
         assert org['package_count'] == 13, "Should be 13 datasets: {}".format(org)
 
 
-    def _test_11_get_resource_downloads(self):
+    def test_11_get_resource_downloads(self):
         dataset, resources = self._create_package_resource(num_resources=8, resource=True)
         package = helpers.call_action('package_show', id=dataset[0]['id'], include_tracking=True)
 
@@ -511,7 +511,7 @@ class TestCli(helpers.FunctionalTestBase):
         result = os.system('paster report send a-new-journal -c /etc/ckan/default/development.ini')
         assert False, '>>>{}'.format(result)
 
-    def test_15_create_body(self):
+    def _test_15_create_body(self):
         dataset, resources = self._create_package_resource(num_resources=8, resource=True, num_journals=15)
 
         data = {

@@ -2,8 +2,9 @@ from pylons import config
 import ckan.model as model
 from urlparse import urlparse
 import ckan.plugins.toolkit as tk
-from collections import OrderedDict
+from datetime import datetime, timedelta
 from ckan.common import request, c, response
+from collections import OrderedDict, namedtuple
 
 import jinja2
 
@@ -67,6 +68,8 @@ def resource_details(id):
 
 
 def journal_resource_downloads(journal_id, engine_check=None):
+    today = datetime.now()
+    target_period = today - timedelta(days=30)
     return_dict = {}
     sql = """
         SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
@@ -82,7 +85,8 @@ def journal_resource_downloads(journal_id, engine_check=None):
     else:
         results = engine_check.execute(sql, id=journal_id).fetchall()
     for result in results:
-        return_dict[result[1]] = [result[2], result[3], result[6]]
+        return_dict[result[1]] = [result[2], result[3], result[6], 0]
+
     return return_dict
 
 
@@ -92,6 +96,8 @@ def journal_download_summary(id, package, engine_check=None):
         id: of owner org
         package: id
     """
+    today = datetime.now()
+    target_period = today - timedelta(days=30)
     return_dict = OrderedDict()
     sql = """
         SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
@@ -172,4 +178,34 @@ def create_email(data):
     with open('./ckanext/journal_dashboard/templates/package/text.html') as file:
         template = jinja2.Template(file.read())
     return template.render(data, is_published=is_published_, package_tracking=package_tracking, journal_download_summary=journal_download_summary)
+
+
+def pack_resources(resources):
+    out = []
+    for resource in resources:
+        #print(resource.keys())
+        out.append(resource['format'])
+        out.append(resource['name'])
+        out.append(resource['url'])
+        out.append(resource['format'])
+    return 0
+
+
+def gather_resources(org):
+    Dataset=namedtuple('Dataset', ['published','dataset','views', 'url','resources'])
+    result = []
+
+    for package in org['packages']:
+        resources = []
+        id_ = package['id']
+        pack_stat = package_tracking(package['id'])
+        r = pack_resources(get_resources(id_))
+        d = Dataset(package['private'] != True,
+                    package['title'],
+                    pack_stat['total'],
+                    package['url'],
+                    r)
+
+    return 0
+
 

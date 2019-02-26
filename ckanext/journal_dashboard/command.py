@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+import csv
 import smtplib
 import logging
-import tabulate
 from time import time
+from tabulate import tabulate
 
 from email import Utils
 from email.header import Header
@@ -12,6 +14,7 @@ from pylons import config
 from ckan.lib.cli import CkanCommand
 import ckanext.journal_dashboard.emails as e
 import ckanext.journal_dashboard.helpers as h
+import ckanext.journal_dashboard.journal_classes as jc
 
 
 log = logging.getLogger(__name__)
@@ -60,22 +63,34 @@ class JournalSummaryReport(CkanCommand):
         views = h.total_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
         downloads = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine)
 
+        summary = [['Datasets', 'Resources', 'Total Views', 'Total Downloads'],
+                   [len(packages), 'TODO', views, downloads]]
+
+        package_list = []
+        for package in packages:
+            package_list.append(jc.Dataset(engine, package['id']))
+
         data = {
                   'prefix': config.get('ckan.site_url'),
                   'journal': org['title'],
-                  'datasets': len(packages),
-                  'total_views': views,
-                  'total_downloads': downloads,
-                  'organization': h.get_org(packages[0]['owner_org']),
+                  'summary': summary,
+                  'resources': h.gather_resources(h.get_org(packages[0]['owner_org'])),
+                  'packages': self.create_main_table(package_list)
                 }
-
+        #'organization': h.get_org(packages[0]['owner_org']),
         return data
 
+
+    def create_main_table(self, packages):
+        out = [['Published?', 'Dataset (Views)', 'Resource', 'Downloads (Last 20 Days)', 'Downloads (total)']]
+        for package in packages:
+            out.append(package.as_list())
+
+        return out
 
 
     def send(self, engine, journal, address):
         data = self.gather_data(engine, journal)
-        data['engine'] = engine
 
         html = self.get_html()
         text = self.get_text()
@@ -83,9 +98,9 @@ class JournalSummaryReport(CkanCommand):
         #html = html.format(table=tabulate(data, headers="firstrow", tablefmt="html"))
         #text = text.format(table=tabulate(data, headers="firstrow", tablefmt="grid"))
 
-        html = html.format(**data)
+        html = html.format(summary_table=tabulate(data['summary'], headers='firstrow', tablefmt='html'), main_table=tabulate(data['packages'], headers='firstrow', tablefmt='html'), **data)
 
-        message = MIMEMultipart('alternative', None, [MIMEText(text), MIMEText(html, 'html')])
+        message = MIMEMultipart('alternative', None, [MIMEText(text.encode('utf-8')), MIMEText(html.encode('utf-8'), 'html')])
         message['Subject'] = Header(u"Journal Acess Summary")
         message['From'] = config.get('smtp.mail_from')
         message['To'] = Header(address, 'utf-8')
