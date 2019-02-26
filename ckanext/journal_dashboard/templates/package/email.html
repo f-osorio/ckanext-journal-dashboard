@@ -68,7 +68,7 @@ a[target="_blank"]:after {
             <span class="item">
             <li style="margin-top: 10px;">
                 <strong>
-                    <a href='/dataset/{{ package["name"] }}'>
+                    <a href='{{ prefix }}/dataset/{{ package["name"] }}'>
                         {%- if is_published(package['name']) -%}
                             <span class="label label-published">{{ package['title']|truncate(35) }}</span>
                         {%- else -%}
@@ -88,7 +88,7 @@ a[target="_blank"]:after {
             </li>
             <ul>
                 {%- if package['num_resources'] > 0 -%}
-                    {%- set summary = journal_download_summary(organization['id'], package['id']) -%}
+                    {%- set summary = journal_download_summary(organization['id'], package['id'], engine_check=engine) -%}
                     {%- for item in summary -%}
                         {%- if summary[item]['name']|length > 21 -%}
                             {%- set name = [summary[item]['name'][:9], summary[item]['name'][-9:]]|join('...') -%}
@@ -109,7 +109,7 @@ a[target="_blank"]:after {
                         {%- endif -%}
 
                         <li class="list_item">{{ spaces|safe }}
-                            <a href="/dataset/{{ summary[item]['package_id'] }}/resource/{{ summary[item]['id'] }}">
+                            <a href="{{ prefix }}/dataset/{{ summary[item]['package_id'] }}/resource/{{ summary[item]['id'] }}">
                                 {%- if summary[item]['format']|length > 0 -%}
                                     {{ name }}</a> &mdash;
                                     {{ summary[item]['total'] }}

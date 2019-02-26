@@ -11,6 +11,13 @@ import pylons.test, pylons, pylons.config as c, ckan.model as model, ckan.tests 
 import ckanext.journal_dashboard.helpers as h
 import ckanext.journal_dashboard.command as command
 
+import ckan.model as model
+engine = model.meta.engine
+
+"""
+TODO:
+    * Add template to an email and send the email to someone.
+"""
 
 class TestCli(helpers.FunctionalTestBase):
     def teardown(self):
@@ -358,7 +365,7 @@ class TestCli(helpers.FunctionalTestBase):
         email = h.create_email(data)
         assert 'Access Summary for Test Journal Title' in email, 'Didn\'t find title in email body'
 
-    def test_13_create_email_full(self):
+    def _test_13_create_email_template_full(self):
         count = 0
         dataset = self._create_package_resource(resource=False, num_journals=5)
         org = h.get_org(dataset[0]['owner_org'])
@@ -499,3 +506,22 @@ class TestCli(helpers.FunctionalTestBase):
         assert False, email
 
 
+    def _test_14_command_line_interface(self):
+        import os
+        result = os.system('paster report send a-new-journal -c /etc/ckan/default/development.ini')
+        assert False, '>>>{}'.format(result)
+
+    def test_15_create_body(self):
+        dataset, resources = self._create_package_resource(num_resources=8, resource=True, num_journals=15)
+
+        data = {
+                    'journal': 'Test Journal Title',
+                    'datasets': '15',
+                    'total_views': '57',
+                    'total_downloads': '20',
+                    'organization': h.get_org(dataset[0]['owner_org']),
+                }
+
+        body = h.create_email(data)
+
+        assert False, body

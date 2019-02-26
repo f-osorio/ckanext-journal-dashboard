@@ -66,7 +66,7 @@ def resource_details(id):
     return resource
 
 
-def journal_resource_downloads(journal_id):
+def journal_resource_downloads(journal_id, engine_check=None):
     return_dict = {}
     sql = """
         SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
@@ -77,14 +77,17 @@ def journal_resource_downloads(journal_id):
             ON ts.url = r.url
         WHERE p.owner_org = %(id)s;
         """
-    results = engine.execute(sql, id=journal_id).fetchall()
+    if engine_check is None:
+        results = engine.execute(sql, id=journal_id).fetchall()
+    else:
+        results = engine_check.execute(sql, id=journal_id).fetchall()
     for result in results:
         return_dict[result[1]] = [result[2], result[3], result[6]]
     return return_dict
 
 
 
-def journal_download_summary(id, package):
+def journal_download_summary(id, package, engine_check=None):
     """
         id: of owner org
         package: id
@@ -99,7 +102,10 @@ def journal_download_summary(id, package):
             ON ts.url = r.url
         WHERE p.owner_org = %(id)s;
         """
-    results = engine.execute(sql, id=id).fetchall()
+    if engine_check is None:
+        results = engine.execute(sql, id=id).fetchall()
+    else:
+        results = engine_check.execute(sql, id=id).fetchall()
     package_resources = get_resources(package)
     match = False
     for item in package_resources:
@@ -131,7 +137,7 @@ def is_private(pkg):
     return pkg.get('private', True)
 
 
-def total_views_across_journal_datasets(journal_id):
+def total_views_across_journal_datasets(journal_id, engine_check=None):
     sql = """
             SELECT g.id, SUM(ts.count)
             FROM "group" as g
@@ -143,13 +149,19 @@ def total_views_across_journal_datasets(journal_id):
                 AND p.owner_org = %(id)s
             GROUP BY g.id;
         """
+    if engine_check is None:
+        results = engine.execute(sql, id=journal_id).fetchall()
+    else:
+        results = engine_check.execute(sql, id=journal_id).fetchall()
 
-    results = engine.execute(sql, id=journal_id).fetchall()
     return results[0][1]
 
 
-def total_downloads_journal(journal_id):
-    data = journal_resource_downloads(journal_id)
+def total_downloads_journal(journal_id, engine_check=None):
+    if engine_check is None:
+        data = journal_resource_downloads(journal_id)
+    else:
+        data = journal_resource_downloads(journal_id, engine_check)
     total = 0
     for k,v in data.items():
         total += v[0]
@@ -157,7 +169,7 @@ def total_downloads_journal(journal_id):
 
 
 def create_email(data):
-    with open('./ckanext/journal_dashboard/templates/package/email.html') as file:
+    with open('./ckanext/journal_dashboard/templates/package/text.html') as file:
         template = jinja2.Template(file.read())
     return template.render(data, is_published=is_published_, package_tracking=package_tracking, journal_download_summary=journal_download_summary)
 
