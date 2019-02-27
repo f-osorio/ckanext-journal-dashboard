@@ -63,30 +63,59 @@ class JournalSummaryReport(CkanCommand):
         views = h.total_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
         downloads = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine)
 
-        summary = [['Datasets', 'Resources', 'Total Views', 'Total Downloads'],
-                   [len(packages), 'TODO', views, downloads]]
-
         package_list = []
         for package in packages:
             package_list.append(jc.Dataset(engine, package['id']))
+            package_list = sorted(package_list, key=lambda x: x.views, reverse=True)
+
+        num_resources = sum([len(p.resources) for p in package_list])
+
+        summary = [['Datasets', 'Resources', 'Total Views', 'Total Downloads'],
+                   [len(packages), num_resources, views, downloads]]
 
         data = {
                   'prefix': config.get('ckan.site_url'),
                   'journal': org['title'],
                   'summary': summary,
                   'resources': h.gather_resources(h.get_org(packages[0]['owner_org'])),
-                  'packages': self.create_main_table(package_list)
+                  'packages_text': self.create_main_text(package_list),
+                  'packages': self.create_main_table(package_list),
+                  'package_num': len(packages),
+                  'package_resources': num_resources,
+                  'package_view': views,
+                  'package_download': downloads,
                 }
         #'organization': h.get_org(packages[0]['owner_org']),
         return data
 
+    def create_main_text(self, packages):
+        out = ""
+        dataset_string = u"\n{dataset}\nViews: {views}\n"
+        resource_string = u"\t{resource}\n\t\tDownloads (Last 30 Days): {days}\n\t\tDownloads (Total): {total}\n"
+        resource_string_link = u'\t{resource}\n'
+
+        for package in packages:
+            out += dataset_string.format(dataset=package.name, views=package.views)
+            if len(package.resources) > 0:
+                out += 'Resources:\n'
+                for resource in package.resources:
+                    if resource.total_downloads >= 0:
+                        out += resource_string.format(resource=resource.name or resource.url, days=resource.previous_month_downloads, total=resource.total_downloads)
+                    else:
+                        out += resource_string_link.format(resource=resource.url)
+            else:
+                out += '0 Resources\n'
+        return out
 
     def create_main_table(self, packages):
-        out = [['Published?', 'Dataset (Views)', 'Resource', 'Downloads (Last 20 Days)', 'Downloads (total)']]
+        headers = ['Published?', 'Dataset', 'Views', 'Resource', 'Downloads (Last 30 Days)', 'Downloads (Total)']
+        data = []
         for package in packages:
-            out.append(package.as_list())
+            data += package.as_list()
 
-        return out
+        table = h.create_table({'headers': headers, 'data': data})
+
+        return table
 
 
     def send(self, engine, journal, address):
@@ -95,12 +124,11 @@ class JournalSummaryReport(CkanCommand):
         html = self.get_html()
         text = self.get_text()
 
-        #html = html.format(table=tabulate(data, headers="firstrow", tablefmt="html"))
-        #text = text.format(table=tabulate(data, headers="firstrow", tablefmt="grid"))
-
-        html = html.format(summary_table=tabulate(data['summary'], headers='firstrow', tablefmt='html'), main_table=tabulate(data['packages'], headers='firstrow', tablefmt='html'), **data)
+        text = text.format(**data)
+        html = html.format(summary_table=tabulate(data['summary'], headers='firstrow', tablefmt='html'), main_table=data['packages'], **data)
 
         message = MIMEMultipart('alternative', None, [MIMEText(text.encode('utf-8')), MIMEText(html.encode('utf-8'), 'html')])
+        #message = MIMEMultipart('alternative', None, [MIMEText(text.encode('utf-8'))])
         message['Subject'] = Header(u"Journal Acess Summary")
         message['From'] = config.get('smtp.mail_from')
         message['To'] = Header(address, 'utf-8')
@@ -117,7 +145,7 @@ class JournalSummaryReport(CkanCommand):
             smtp_connection.quit()
             return True
         except Exception as e:
-            log.error("Mail to {} could not be sent".format(address))
+            log.error("Mail to could not be sent")
             log.error(e)
             print('Failure')
             print(e)

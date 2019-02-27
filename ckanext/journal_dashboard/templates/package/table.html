@@ -1,0 +1,46 @@
+<table style="border: 1px solid black; table-layout: fixed; border-collapse: collapse; text-align:center; padding-right: 5px; padding-left: 5px;">
+    <thead>
+        <tr>
+            {% for value in headers %}
+                <td><strong>{{ value }}</strong></td>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in data %}
+        {% if row[0] != '' %}
+        <tr style="background: gray;">
+        {% else %}
+        <tr>
+        {% endif %}
+            {% if row[0] != '' %}
+                <td>{{ row[0] == False }}</td>
+                <td>{{ row[1]|truncate(25, True) }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+            {% else %}
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                {% if row[3] != '' %}
+                    <td>
+                    <a href="{{ row[4] }}">{{ row[3]|truncate(25, True) }}</a>
+                    </td>
+                {% else %}
+                    <td>
+                    <a href="{{ row[4] }}">{{ row[4]|truncate(25, True) }}</a>
+                    </td>
+                {% endif %}
+                {% if row[6] >= 0%}
+                    <td>{{ row[6] }}</td>
+                    <td>{{ row[7] }}</td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                {% endif %}
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

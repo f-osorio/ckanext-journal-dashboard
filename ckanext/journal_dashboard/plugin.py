@@ -44,6 +44,7 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
                 'total_views_across_journal_datasets': helpers.total_views_across_journal_datasets,
                 'total_downloads_journal': helpers.total_downloads_journal,
                 'journal_download_summary': helpers.journal_download_summary,
+                'count_org_resources': helpers.count_org_resources,
         }
 
 

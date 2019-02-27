@@ -1,6 +1,7 @@
 """
 
 """
+from pylons import config
 import ckan.model as model
 import ckan.plugins.toolkit as tk
 
@@ -37,10 +38,12 @@ class Dataset:
         out = []
         for resource in data['resources']:
             out.append(Resource(self.engine, resource['id'], self.date))
+        out = sorted(out, key=lambda x: x.total_downloads, reverse=True)
         return out
 
+
     def _get_total_downloads(self):
-        return sum([resource.total_downloads for resource in self.resources])
+        return sum([resource.total_downloads for resource in self.resources if type(resource.total_downloads) == int ])
 
 
     def _get_previous_views(self, id, today):
@@ -63,9 +66,16 @@ class Dataset:
                 Dataset: published, name, empty, empty, empty
                 Resources: empty, empty, name, last month, total
         """
-        # TODO: finish this
-        out = []
-        return [self.private, u"{} ({})".format(self.name, self.views), [resource.as_list() for resource in self.resources]]
+        # TODO: finish this VVV
+        out=[[self.private, self.name, self.views,'','','']]
+        for resource in self.resources:
+            tmp = resource.as_list()
+            tmp.insert(0, '')
+            tmp.insert(0, '')
+            tmp.insert(0, '')
+            out.append(tmp)
+        return out
+
 
 
 class Resource:
@@ -78,6 +88,10 @@ class Resource:
         self.total_downloads = data['tracking_summary']['total']
         self.recent_downlaods = data['tracking_summary']['recent']
         self.previous_month_downloads = self._get_last_month_downloads(self.url, date)
+        if config.get('ckan.site_url', '') not in self.url:
+            self.total_downloads = -1
+            self.recent_downlaods = -1
+            self.previous_month_downloads = -1
 
 
     def _get_resource(self, id):

@@ -12,6 +12,20 @@ import jinja2
 engine = model.meta.engine
 
 
+def count_org_resources(org):
+    sql = """
+        SELECT COUNT(r.name)
+        FROM resource as r
+        JOIN package as p
+            ON r.package_id = p.id
+        WHERE p.owner_org = %(org)s
+            AND r.state = 'active'
+            AND p.state = 'active';
+    """
+    results = engine.execute(sql, org=org).fetchall()
+    return results[0][0]
+
+
 def dashboard_read(context, data_dict=None):
     """ Only administrators should have access """
     user_id = context['auth_user_obj'].id
@@ -178,6 +192,12 @@ def create_email(data):
     with open('./ckanext/journal_dashboard/templates/package/text.html') as file:
         template = jinja2.Template(file.read())
     return template.render(data, is_published=is_published_, package_tracking=package_tracking, journal_download_summary=journal_download_summary)
+
+
+def create_table(data):
+    with open('./ckanext/journal_dashboard/templates/package/table.html') as f:
+        template = jinja2.Template(f.read())
+    return template.render(data)
 
 
 def pack_resources(resources):

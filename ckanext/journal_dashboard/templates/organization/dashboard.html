@@ -46,8 +46,8 @@
                         <dd>{{ h.SI_number_span(organization.package_count) }}</dd>
                     </dl>
                     <dl>
-                        <dt>{{ _('Followers') }}</dt>
-                        <dd>{{ h.SI_number_span(organization.num_followers) }}</dd>
+                        <dt>{{ _('Resources') }}</dt>
+                        <dd>{{ h.count_org_resources(organization['id']) }}</dd>
                     </dl>
                     {% endif %}
                     <dl>
