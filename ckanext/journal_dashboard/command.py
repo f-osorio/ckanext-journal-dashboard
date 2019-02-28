@@ -77,7 +77,6 @@ class JournalSummaryReport(CkanCommand):
                   'prefix': config.get('ckan.site_url'),
                   'journal': org['title'],
                   'summary': summary,
-                  'resources': h.gather_resources(h.get_org(packages[0]['owner_org'])),
                   'packages_text': self.create_main_text(package_list),
                   'packages': self.create_main_table(package_list),
                   'package_num': len(packages),
@@ -131,9 +130,9 @@ class JournalSummaryReport(CkanCommand):
         #message = MIMEMultipart('alternative', None, [MIMEText(text.encode('utf-8'))])
         message['Subject'] = Header(u"Journal Acess Summary")
         message['From'] = config.get('smtp.mail_from')
-        message['To'] = Header(address, 'utf-8')
+        message['To'] = address  #Header(address, 'utf-8')
         message['Date'] = Utils.formatdate(time())
-        message['X-Mailer'] = "JDA ???"
+        message['X-Mailer'] = "JDA Access Summary"
 
         mail_from = config.get('smtp.mail_from')
 

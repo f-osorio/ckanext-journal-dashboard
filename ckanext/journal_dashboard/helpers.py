@@ -98,8 +98,13 @@ def journal_resource_downloads(journal_id, engine_check=None):
         results = engine.execute(sql, id=journal_id).fetchall()
     else:
         results = engine_check.execute(sql, id=journal_id).fetchall()
+
     for result in results:
-        return_dict[result[1]] = [result[2], result[3], result[6], 0]
+        if result[1] in return_dict.keys():
+            if return_dict[result[1]][3] < result[4]:
+                return_dict[result[1]] = [result[2], result[3], result[6], result[4]]
+        else:
+            return_dict[result[1]] = [result[2], result[3], result[6], result[4]]
 
     return return_dict
 
@@ -132,7 +137,11 @@ def journal_download_summary(id, package, engine_check=None):
         if item['id'] in [result[0] for result in results]:
             for result in results:
                 if item['id'] == result[0]:
-                    return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': result[2], 'recent': result[3]}
+                    if item['id'] in return_dict.keys():
+                        if return_dict[item['id']]['date'] < result[4]:
+                            return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': result[2], 'recent': result[3], 'date': result[4]}
+                    else:
+                        return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': result[2], 'recent': result[3], 'date': result[4]}
         else:
             return_dict[item['id']] = {'name': item['name'], 'package_id': item['package_id'], 'id': item['id'], 'url': item['url'], 'format': item['format'], 'total': 0}
 
@@ -199,33 +208,5 @@ def create_table(data):
         template = jinja2.Template(f.read())
     return template.render(data)
 
-
-def pack_resources(resources):
-    out = []
-    for resource in resources:
-        #print(resource.keys())
-        out.append(resource['format'])
-        out.append(resource['name'])
-        out.append(resource['url'])
-        out.append(resource['format'])
-    return 0
-
-
-def gather_resources(org):
-    Dataset=namedtuple('Dataset', ['published','dataset','views', 'url','resources'])
-    result = []
-
-    for package in org['packages']:
-        resources = []
-        id_ = package['id']
-        pack_stat = package_tracking(package['id'])
-        r = pack_resources(get_resources(id_))
-        d = Dataset(package['private'] != True,
-                    package['title'],
-                    pack_stat['total'],
-                    package['url'],
-                    r)
-
-    return 0
 
 
