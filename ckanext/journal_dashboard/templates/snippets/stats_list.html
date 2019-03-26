@@ -6,10 +6,15 @@
         organization - dict of metadata for the organization
 #}
 {% resource 'journal-dashboard/dashboard.css' %}
-<h1>
-    Some kinda title?
+<h1 style="margin-bottom: 10px;">
+    {{ _('At A Glance') }}
 </h1>
-
+<div style="margin-bottom: 30px;">
+    <span class="label label-published">Published</span>
+    <span class="label label-inverse">Private</span>
+    <span class="label label-review flat">Review</span>
+    <span class="label label-reauthor flat">Re-Author</span>
+</div>
 <ul id="dashboard_list">
     {% for package in organization['packages'] %}
         <span class="item">
@@ -18,8 +23,12 @@
                 <a href='/dataset/{{ package["name"] }}'>
                     {%- if h.is_published_(package['name']) -%}
                         <span class="label label-published">{{ package['title']|truncate(35) }}</span>
+                    {%- elif h.in_review(package) == 'true' -%}
+                        <span class="label label-review flat">{{ package['title']|truncate(35) }}</span>
+                    {%- elif h.in_review(package) == 'reauthor' -%}
+                        <span class="label label-reauthor flat">{{ package['title']|truncate(35) }}</span>
                     {%- else -%}
-                        <span class="label label-important">{{ package['title']|truncate(35) }}</span>
+                        <span class="label label-inverse">{{ package['title']|truncate(35) }}</span>
                     {%- endif -%}
                 </a>
             </strong>

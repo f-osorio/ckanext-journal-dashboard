@@ -1,0 +1,20 @@
+0000000000000000000000000000000000000000 84ff9e9640a5630d511b89e24b2c93e0237f0118 franz osorio <f.osorio@zbw.eu> 1549464682 +0100	commit (initial): First commit
+84ff9e9640a5630d511b89e24b2c93e0237f0118 44487847ad717d77abf9917686b3a9def37654b9 franz osorio <f.osorio@zbw.eu> 1549623612 +0100	commit: Base is in place, TODO in plugin.py
+44487847ad717d77abf9917686b3a9def37654b9 6518c2e49c9d1545d4a04bbc1c5d1b56db0f6fad franz osorio <f.osorio@zbw.eu> 1549637872 +0100	commit: Add label for un/published
+6518c2e49c9d1545d4a04bbc1c5d1b56db0f6fad 9d3101a7e6590c48a4eab52cb9ea854b897cb454 franz osorio <f.osorio@zbw.eu> 1549638064 +0100	commit: Remove journal-dashboard/ dircetory
+9d3101a7e6590c48a4eab52cb9ea854b897cb454 68a615e59445c17445517c3a825a883fd016deb2 franz osorio <f.osorio@zbw.eu> 1549876029 +0100	commit: Update journal view and download counts
+68a615e59445c17445517c3a825a883fd016deb2 e3521b5df0a77d7bb12492ac34bc2f21bf58beb4 franz osorio <f.osorio@zbw.eu> 1550153687 +0100	commit: Authorization setup for button and page access
+e3521b5df0a77d7bb12492ac34bc2f21bf58beb4 21b770ffb9a06d85d6e25ea0360ebdda7f2972a0 franz osorio <f.osorio@zbw.eu> 1550572474 +0100	commit: Update formating for download numbers
+21b770ffb9a06d85d6e25ea0360ebdda7f2972a0 4c70a41a49001e94f7b84fdb2003530443b2e28c franz osorio <f.osorio@zbw.eu> 1550585081 +0100	commit: Restructure item list
+4c70a41a49001e94f7b84fdb2003530443b2e28c 45cd93f4e73c51bd79eac66961f443f6d306d8b3 franz osorio <f.osorio@zbw.eu> 1550663039 +0100	commit: Improve how the list is sorted.
+45cd93f4e73c51bd79eac66961f443f6d306d8b3 9f4f50009cc5fe40141ceb65d46ef8720b605d9c franz osorio <f.osorio@zbw.eu> 1550681032 +0100	commit: New CLI operation for sending reports from journals
+9f4f50009cc5fe40141ceb65d46ef8720b605d9c cab12fc65a4cf9856de91cb921bfee4e795c6478 franz osorio <f.osorio@zbw.eu> 1550843412 +0100	commit: Create emails and testing
+cab12fc65a4cf9856de91cb921bfee4e795c6478 cab12fc65a4cf9856de91cb921bfee4e795c6478 franz osorio <f.osorio@zbw.eu> 1550843670 +0100	checkout: moving from master to cab12fc65a4cf9856de91cb921bfee4e795c6478
+cab12fc65a4cf9856de91cb921bfee4e795c6478 cab12fc65a4cf9856de91cb921bfee4e795c6478 franz osorio <f.osorio@zbw.eu> 1550843670 +0100	rebase -i (finish): returning to refs/heads/master
+cab12fc65a4cf9856de91cb921bfee4e795c6478 cab12fc65a4cf9856de91cb921bfee4e795c6478 franz osorio <f.osorio@zbw.eu> 1550843726 +0100	checkout: moving from master to cab12fc65a4cf9856de91cb921bfee4e795c6478
+cab12fc65a4cf9856de91cb921bfee4e795c6478 cab12fc65a4cf9856de91cb921bfee4e795c6478 franz osorio <f.osorio@zbw.eu> 1550843726 +0100	rebase -i (finish): returning to refs/heads/master
+cab12fc65a4cf9856de91cb921bfee4e795c6478 39135f2a4ca08f69fd332b419b2946e091f07b5f franz osorio <f.osorio@zbw.eu> 1551171184 +0100	commit: Email with html, but needs rework
+39135f2a4ca08f69fd332b419b2946e091f07b5f fbe4179aff9d16ccae02bd4b72fff3c83077ceb1 franz osorio <f.osorio@zbw.eu> 1551195313 +0100	commit: Rework how emails are created
+fbe4179aff9d16ccae02bd4b72fff3c83077ceb1 64df1aa3341a569ce590506239a5f4dd04e1a1d5 franz osorio <f.osorio@zbw.eu> 1551280603 +0100	commit: Rough emails and stats page up
+64df1aa3341a569ce590506239a5f4dd04e1a1d5 136bb8c48662afa28ba5b3ba6192e8bb2be905b7 franz osorio <f.osorio@zbw.eu> 1551359043 +0100	commit: Update process of getting data for page
+136bb8c48662afa28ba5b3ba6192e8bb2be905b7 22ea4526a890d03a0858a600ab09f53a83f87a0d franz osorio <f.osorio@zbw.eu> 1552293924 +0100	merge jda-dev/master: Fast-forward
