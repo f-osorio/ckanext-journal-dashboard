@@ -24,7 +24,10 @@ class JournalSummaryReport(CkanCommand):
     """ Creates and sends a report to the journals for their journals items
 
     Usage:
-        summary-report send [journal-name] [recipient] -- gather summary information for a given journal and send a report to the journal editor/manager
+        report send [journal-name] [recipient] -- gather summary information for a given journal and send a report to the journal editor/manager
+
+    Cron:
+        --plugin=ckanext-journal-dashboard
     """
     summary = __doc__.split('\n')[0]
     usage = __doc__

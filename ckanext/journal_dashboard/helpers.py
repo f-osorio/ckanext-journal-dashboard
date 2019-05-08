@@ -1,3 +1,4 @@
+import os
 from pylons import config
 import ckan.model as model
 from urlparse import urlparse
@@ -204,9 +205,9 @@ def create_email(data):
 
 
 def create_table(data):
-    with open('./ckanext/journal_dashboard/templates/package/table.html') as f:
+    dirc = os.path.dirname(os.path.abspath(__file__))
+    path = '/templates/package/table.html'
+    with open(dirc + path) as f:
         template = jinja2.Template(f.read())
     return template.render(data)
-
-
 
