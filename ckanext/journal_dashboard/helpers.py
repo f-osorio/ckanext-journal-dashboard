@@ -13,6 +13,14 @@ import jinja2
 engine = model.meta.engine
 
 
+def get_id_from_url(url):
+    parts = url.split('/')
+    print('======================')
+    print(parts)
+    print(parts[-2])
+    return parts[-2]
+
+
 def count_org_resources(org):
     sql = """
         SELECT COUNT(r.name)

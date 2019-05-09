@@ -45,6 +45,7 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
                 'total_downloads_journal': helpers.total_downloads_journal,
                 'journal_download_summary': helpers.journal_download_summary,
                 'count_org_resources': helpers.count_org_resources,
+                'get_id_from_url': helpers.get_id_from_url,
         }
 
 

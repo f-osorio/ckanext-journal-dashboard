@@ -1,8 +1,12 @@
 {% ckan_extends %}
 
 {% block content_primary_nav %}
-    {{ super() }}
+    {% set id = h.get_id_from_url(request.url) %}
+
+    {{ h.build_nav_icon('organization_read', _('Datasets'), id=c.group_dict.name or id) }}
+    {{ h.build_nav_icon('organization_activity', _('Activity Stream'), id=c.group_dict.name or id) }}
+    {{ h.build_nav_icon('organization_about', _('About'), id=c.group_dict.name or id) }}
     {% if h.check_access('dashboard_read') %}
-        {{ h.build_nav_icon('journal_stats', _('Stats'), id=c.group_dict.name) }}
+      {{ h.build_nav_icon('journal_stats', _('Stats'), id=c.group_dict.name or id) }}
     {% endif %}
 {% endblock %}
