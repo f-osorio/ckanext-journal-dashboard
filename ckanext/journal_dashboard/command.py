@@ -63,8 +63,11 @@ class JournalSummaryReport(CkanCommand):
         org = h.get_org(journal)
         packages = org['packages']
 
-        views = h.total_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
-        downloads = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine)
+        views_total = h.total_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
+        downloads_total = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine)
+
+        views_monthly = h.last_month_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
+        downloads_monthly = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine, monthly=True)
 
         package_list = []
         for package in packages:
@@ -74,7 +77,7 @@ class JournalSummaryReport(CkanCommand):
         num_resources = sum([len(p.resources) for p in package_list])
 
         summary = [['Datasets', 'Resources', 'Total Views', 'Total Downloads'],
-                   [len(packages), num_resources, views, downloads]]
+                   [len(packages), num_resources, views_total, downloads_total]]
 
         data = {
                   'prefix': config.get('ckan.site_url'),
@@ -84,8 +87,10 @@ class JournalSummaryReport(CkanCommand):
                   'packages': self.create_main_table(package_list),
                   'package_num': len(packages),
                   'package_resources': num_resources,
-                  'package_view': views,
-                  'package_download': downloads,
+                  'package_view_total': views_total,
+                  'package_download_total': downloads_total,
+                  'package_view_monthly': views_monthly,
+                  'package_download_monthly': downloads_monthly,
                 }
         #'organization': h.get_org(packages[0]['owner_org']),
         return data
@@ -110,7 +115,7 @@ class JournalSummaryReport(CkanCommand):
         return out
 
     def create_main_table(self, packages):
-        headers = ['Published?', 'Dataset', 'Views', 'Resource', 'Downloads (Last 30 Days)', 'Downloads (Total)']
+        headers = ['Published?*', 'Data Submission', 'Views', 'Resource', 'Downloads (Last 30 Days)', 'Downloads (Total)']
         data = []
         for package in packages:
             data += package.as_list()

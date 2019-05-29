@@ -27,11 +27,11 @@ class Dataset:
     def _get_dataset(self, id):
         data = {'id': id, 'include_tracking': True}
         try:
-            org = tk.get_action('package_show')(None, data)
+            dataset = tk.get_action('package_show')(None, data)
         except:
             context = {'user': 'default'}
-            org = tk.get_action('package_show')(context, data)
-        return org
+            dataset = tk.get_action('package_show')(context, data)
+        return dataset
 
 
     def _populate_resources(self, data):
@@ -44,6 +44,9 @@ class Dataset:
 
     def _get_total_downloads(self):
         return sum([resource.total_downloads for resource in self.resources if type(resource.total_downloads) == int ])
+
+    def _get_previous_downloads(self):
+        return sum([resource.previous_month_downloads for resource in self.resources if type(resource.previous_month_downloads) == int ])
 
 
     def _get_previous_views(self, id, today):

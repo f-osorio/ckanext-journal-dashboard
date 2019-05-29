@@ -87,11 +87,11 @@ def resource_details(id):
     return resource
 
 
-def journal_resource_downloads(journal_id, engine_check=None):
+def journal_resource_downloads(journal_id, engine_check=None, monthly=False):
     today = datetime.now()
     target_period = today - timedelta(days=30)
     return_dict = {}
-    sql = """
+    sql_total = """
         SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
         FROM package as p
         JOIN resource as r
@@ -100,10 +100,27 @@ def journal_resource_downloads(journal_id, engine_check=None):
             ON ts.url = r.url
         WHERE p.owner_org = %(id)s;
         """
+
+    sql_monthly = """
+        SELECT r.id, r.url, ts.running_total, ts.recent_views, ts.tracking_date, ts.url, r.format
+        FROM package as p
+        JOIN resource as r
+            ON r.package_id = p.id
+        JOIN tracking_summary as ts
+            ON ts.url = r.url
+        WHERE p.owner_org = %(id)s
+            AND ts.tracking_date >= %(time)s::date;
+        """
     if engine_check is None:
-        results = engine.execute(sql, id=journal_id).fetchall()
+        if not monthly:
+            results = engine.execute(sql_total, id=journal_id).fetchall()
+        else:
+            results = engine.execute(sql_monthly, id=journal_id, time=target_period).fetchall()
     else:
-        results = engine_check.execute(sql, id=journal_id).fetchall()
+        if not monthly:
+            results = engine_check.execute(sql_total, id=journal_id).fetchall()
+        else:
+            results = engine_check.execute(sql_monthly, id=journal_id, time=target_period).fetchall()
 
     for result in results:
         if result[1] in return_dict.keys():
@@ -192,11 +209,38 @@ def total_views_across_journal_datasets(journal_id, engine_check=None):
     return results[0][1]
 
 
-def total_downloads_journal(journal_id, engine_check=None):
+def last_month_views_across_journal_datasets(journal_id, engine_check=None):
+    target_period = datetime.now() - timedelta(days=30)
+
+    sql = """
+            SELECT g.id, SUM(ts.count)
+            FROM "group" as g
+            JOIN package as p
+                ON g.id = p.owner_org
+            JOIN tracking_summary as ts
+                ON ts.package_id = p.id
+            WHERE p.state = 'active'
+                AND p.owner_org = %(id)s
+                AND ts.tracking_date >= %(time)s::date
+            GROUP BY g.id;
+        """
     if engine_check is None:
-        data = journal_resource_downloads(journal_id)
+        results = engine.execute(sql, id=journal_id, time=target_period).fetchall()
     else:
-        data = journal_resource_downloads(journal_id, engine_check)
+        results = engine_check.execute(sql, id=journal_id, time=target_period).fetchall()
+
+    try:
+        return results[0][1]
+    except IndexError:
+        return 0
+
+
+def total_downloads_journal(journal_id, engine_check=None, monthly=False):
+    if engine_check is None:
+        if not monthly:
+            data = journal_resource_downloads(journal_id, monthly=monthly)
+    else:
+        data = journal_resource_downloads(journal_id, engine_check, monthly=monthly)
     total = 0
     for k,v in data.items():
         total += v[0]
