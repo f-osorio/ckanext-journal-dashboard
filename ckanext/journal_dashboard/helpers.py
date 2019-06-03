@@ -88,6 +88,11 @@ def resource_details(id):
 
 
 def journal_resource_downloads(journal_id, engine_check=None, monthly=False):
+    """
+    A new row is added to the database each time there is a download.
+    This is the reason for the looping at the bottom - findind only the most
+    recent values
+    """
     today = datetime.now()
     target_period = today - timedelta(days=30)
     return_dict = {}
@@ -128,7 +133,7 @@ def journal_resource_downloads(journal_id, engine_check=None, monthly=False):
                 return_dict[result[1]] = [result[2], result[3], result[6], result[4]]
         else:
             return_dict[result[1]] = [result[2], result[3], result[6], result[4]]
-
+    # values: total, recent, format, date
     return return_dict
 
 
@@ -242,8 +247,12 @@ def total_downloads_journal(journal_id, engine_check=None, monthly=False):
     else:
         data = journal_resource_downloads(journal_id, engine_check, monthly=monthly)
     total = 0
+    print('total')
     for k,v in data.items():
-        total += v[0]
+        if not monthly:
+            total += v[0]
+        else:
+            total += v[1]
     return total
 
 

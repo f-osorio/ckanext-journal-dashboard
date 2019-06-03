@@ -64,13 +64,16 @@ class Dataset:
     def as_list(self):
         """
             Combine the dataset and resource information into a list of
-            lists. The first row is for the dataset the follow for resources.
+            lists. The first row is for the dataset, the following for resources.
             Need to add empty spaces in the lists soo they line up.
                 Dataset: published, name, empty, empty, empty
                 Resources: empty, empty, name, last month, total
         """
         # TODO: finish this VVV
-        out=[[self.private, self.name, self.views,'','','']]
+        out=[[self.private, self.name, self.views, len(self.resources),'','']]
+        if self.private:
+            return out
+
         for resource in self.resources:
             tmp = resource.as_list()
             tmp.insert(0, '')

@@ -15,12 +15,16 @@ html = u"""
                 padding-left: 5px;
             }}
 
-            .heading{{
+            .heading {{
                 border-bottom: 1px solid black;
             }}
 
             .dataset_name {{
                 background: #8caef7;
+            }}
+
+            h1 {{
+                font-size: 18px;
             }}
         </style>
     </head>
@@ -28,7 +32,7 @@ html = u"""
         <h1>Access Summary for the "{journal}"</h1>
 
         <p>Dear Editor,</p>
-        <p>Please find below some accumulated statistics for the {journal}"</p>
+        <p>Please find below some accumulated statistics for the {journal}</p>
 
         <table style="text-align: center; width: 50%; border: 1px solid black; margin-right: 25%; margin-left: 25%;">
             <thead style="font-weight:bold;">
@@ -61,7 +65,7 @@ html = u"""
         {main_table}
 
         <p>
-            * A data submission is characterised with 'false' if it has not been published yet. This indicates that a submission is in a 'private' state or 'in review.'
+            * A data submission is characterised with 'false' if it has not been published yet. This indicates that a submission is in a 'private' state or 'in review.' Individual resources only appear for published data submissions.
         </p>
     </body>
 </html>
