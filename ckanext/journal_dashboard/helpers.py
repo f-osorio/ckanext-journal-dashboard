@@ -211,7 +211,10 @@ def total_views_across_journal_datasets(journal_id, engine_check=None):
     else:
         results = engine_check.execute(sql, id=journal_id).fetchall()
 
-    return results[0][1]
+    try:
+        return results[0][1]
+    except:
+        return 0
 
 
 def last_month_views_across_journal_datasets(journal_id, engine_check=None):
