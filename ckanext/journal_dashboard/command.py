@@ -136,7 +136,7 @@ class JournalSummaryReport(CkanCommand):
 
         message = MIMEMultipart('alternative', None, [MIMEText(text.encode('utf-8')), MIMEText(html.encode('utf-8'), 'html')])
         #message = MIMEMultipart('alternative', None, [MIMEText(text.encode('utf-8'))])
-        message['Subject'] = Header(u"Journal Acess Summary")
+        message['Subject'] = Header(u"JDA Journal Access Summary")
         message['From'] = config.get('smtp.mail_from')
         message['To'] = address  #Header(address, 'utf-8')
         message['Date'] = Utils.formatdate(time())

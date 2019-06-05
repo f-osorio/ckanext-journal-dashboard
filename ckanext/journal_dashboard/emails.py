@@ -61,6 +61,10 @@ html = u"""
             Below, you will find more detailed statistcs regarding the views of each data submission (landing page) and the downloads of each file for these submissions (e.g. datasets).
         </p>
 
+        <p>
+            Kind regards from the ZBW Journal Data Archive.
+        </p>
+
         <h3>Summary of Data Submissions & Resources:</h3>
         {main_table}
 
