@@ -68,14 +68,32 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-    <h2 class="search-form">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
+    <div class="search-form" style="height: 40px;">
+        <h2 style="float: left;">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
+
+        <div style="float: right;">
+            <label for="dashboard-sort" id="sort-label" style="float:left; font-size:24px; margin-top: 20px;">Sort By</label>
+            <select id="dashboard-sort" style="margin-top:10px;">
+                <option value="views">Views</option>
+                <option value="pub">Published</option>
+                <option value="inv">Private</option>
+                <option value="rev">Review</option>
+                <option value="rea">Re-Author</option>
+            </select>
+        </div>
+
+    </div>
 
     {% block packages_list %}
         {{ h.snippet('snippets/stats_list.html', organization=organization) }}
     {% endblock %}
 
     <script>
-        function sort_list(){
+        /* label-inverse: private */
+        /* label-published: published */
+        /* label-reauthor: reauthor */
+        /* label-review: review */
+        function sort_list(method){
             var list = document.getElementById('dashboard_list');
             var new_list = list.cloneNode(false);
             var items = [];
@@ -86,11 +104,35 @@
                 }
             }
 
-            items.sort(function(a,b){
-                    //console.log(a.childNodes[1].childNodes[3].innerHTML);
-                    return b.childNodes[1].childNodes[3].innerHTML.localeCompare(a.childNodes[1].childNodes[3].innerHTML, undefined,{numeric:true});
-                }
-            );
+            if (method == 'views'){
+                items.sort(function(a,b){
+                        return b.childNodes[1].childNodes[3].innerHTML.localeCompare(a.childNodes[1].childNodes[3].innerHTML, undefined,{numeric:true});
+                    }
+                );
+            } else {
+                items.sort(function(a,b){
+                    var status_chunk_a = a.childNodes[1].childNodes[1].innerHTML;
+                    var index_a = status_chunk_a.indexOf("label-")
+                    var status_a = status_chunk_a.slice(index_a+6, index_a+9);
+
+                    var status_chunk_b = b.childNodes[1].childNodes[1].innerHTML;
+                    var index_b = status_chunk_b.indexOf("label-")
+                    var status_b = status_chunk_b.slice(index_b+6, index_b+9);
+
+                    /* unpublished */
+                    if (method == 'inv') {
+                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                    } else if (method == 'pub') {
+                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                    } else if (method == 'rea') {
+                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                    } else if (method == 'rev') {
+                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                    } else {
+                        return (status_a=='pub')?-1:(status_a>status_b)?1:0;
+                    }
+                });
+            }
 
             //
             for(var i=0; i< items.length; i++){
@@ -99,9 +141,15 @@
             list.parentNode.replaceChild(new_list, list);
         }
 
-        sort_list();
+        /* Add sorting to `dashboard-sort` */
+        document.getElementById('dashboard-sort').addEventListener("change", function(){
+                if (this.value == 'pub'){
+                    sort_list('rea');
+                }
+                sort_list(this.value);
+        });
 
-
+        sort_list('views');
     </script>
 {% endblock %}
 
