@@ -72,7 +72,7 @@
         <h2 style="float: left;">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
 
         <div style="float: right;">
-            <label for="dashboard-sort" id="sort-label" style="float:left; font-size:24px; margin-top: 20px;">Sort By</label>
+            <label for="dashboard-sort" id="sort-label" style="float:left; font-size:20px; margin-top: 20px;">Sort By</label>
             <select id="dashboard-sort" style="margin-top:10px;">
                 <option value="views">Views</option>
                 <option value="pub">Published</option>
@@ -121,21 +121,21 @@
 
                     /* unpublished */
                     if (method == 'inv') {
-                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
                     } else if (method == 'pub') {
-                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
                     } else if (method == 'rea') {
-                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
                     } else if (method == 'rev') {
-                        return (status_a==method)?-1:(status_a>status_b)?1:0;
+                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
                     } else {
-                        return (status_a=='pub')?-1:(status_a>status_b)?1:0;
+                        return (status_a=='pub')?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
                     }
                 });
             }
 
             //
-            for(var i=0; i< items.length; i++){
+            for(var i=0; i<items.length; i++){
                 new_list.appendChild(items[i]);
             }
             list.parentNode.replaceChild(new_list, list);
@@ -145,6 +145,8 @@
         document.getElementById('dashboard-sort').addEventListener("change", function(){
                 if (this.value == 'pub'){
                     sort_list('rea');
+                } else {
+                    sort_list('pub');
                 }
                 sort_list(this.value);
         });
