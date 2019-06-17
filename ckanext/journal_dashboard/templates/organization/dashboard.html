@@ -120,21 +120,23 @@
                     var status_b = status_chunk_b.slice(index_b+6, index_b+9);
 
                     /* unpublished */
+                    //working in FF: 0 1 -1 0
+                    // FF & Chrome: -1 -1 1 0
                     if (method == 'inv') {
-                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
+                        return (status_a==method)?-1:(status_a>status_b)?1:(status_a<status_b)?1:0;
                     } else if (method == 'pub') {
-                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
+                        return (status_a==method)?-1:(status_a>status_b)?1:(status_a<status_b)?1:0;
                     } else if (method == 'rea') {
-                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
+                        return (status_a==method)?-1:(status_a>status_b)?1:(status_a<status_b)?1:0;
                     } else if (method == 'rev') {
-                        return (status_a==method)?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
+                        return (status_a==method)?-1:(status_a>status_b)?1:(status_a<status_b)?1:0;
                     } else {
-                        return (status_a=='pub')?0:(status_a>status_b)?1:(status_a<status_b)?-1:0;
+                        return (status_a=='pub') ?-1:(status_a>status_b)?1:(status_a<status_b)?1:0;
                     }
                 });
             }
 
-            //
+            //console.log(items[0].childNodes[1].childNodes[3].innerHTML);
             for(var i=0; i<items.length; i++){
                 new_list.appendChild(items[i]);
             }
