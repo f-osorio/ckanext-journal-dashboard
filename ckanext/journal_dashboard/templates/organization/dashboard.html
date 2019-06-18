@@ -120,8 +120,8 @@
                     var status_b = status_chunk_b.slice(index_b+6, index_b+9);
 
                     /* unpublished */
-                    //working in FF: 0 1 -1 0
-                    // FF & Chrome: -1 -1 1 0
+                    //working in FF: 0  1 -1 0
+                    // FF & Chrome: -1  1  1 0
                     if (method == 'inv') {
                         return (status_a==method)?-1:(status_a>status_b)?1:(status_a<status_b)?1:0;
                     } else if (method == 'pub') {
