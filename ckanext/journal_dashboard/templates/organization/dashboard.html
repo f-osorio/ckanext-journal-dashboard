@@ -22,11 +22,13 @@
     {% with truncate=truncate or 0, url=h.url_for(controller="organization", action="read", id=organization.id) %}
         <div class="module context-info">
             <section class="module-content">
+                <div class="zbw-box-full">
                 <div class="image">
                     <a href="{{ url }}">
-                        <img src="{{ organization.image_display_url or h.url_for_static('/base/images/placeholder-organization.png') }}" width="200" alt="" />
+                        <img class="journal_img" src="{{ organization.image_display_url or h.url_for_static('/base/images/placeholder-organization.png') }}" width="100%" alt="" />
                     </a>
                 </div>
+
                 <h1 class="heading">
                     {{ id }}
                 </h1>
@@ -38,6 +40,7 @@
                 {% else %}
                     <p class="empty">{{ _('There is no description for this organization') }}</p>
                 {% endif %}
+                </div>
 
                 <div class="nums">
                     {% if pkg is none %}
@@ -68,12 +71,12 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-    <div class="search-form" style="height: 40px;">
-        <h2 style="float: left;">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
+    <div class="search-form zbw-box-full" style="height: 40px;">
+        <h2 style="float: left; display: inline; padding: 10px;" class="zbw-font zbw-blue">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
 
-        <div style="float: right;">
-            <label for="dashboard-sort" id="sort-label" style="float:left; font-size:20px; margin-top: 20px;">Sort By</label>
-            <select id="dashboard-sort" style="margin-top:10px;">
+        <div style="float: right;" class="search-order">
+            <label for="dashboard-sort" id="sort-label" style="float:left; font-size:14px; margin-top: 20px;">Sort By</label>
+            <select id="dashboard-sort" style="margin-top:10px; width: 160px;">
                 <option value="views">Views</option>
                 <option value="pub">Published</option>
                 <option value="inv">Private</option>
