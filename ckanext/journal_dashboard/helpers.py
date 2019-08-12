@@ -250,7 +250,6 @@ def total_downloads_journal(journal_id, engine_check=None, monthly=False):
     else:
         data = journal_resource_downloads(journal_id, engine_check, monthly=monthly)
     total = 0
-    print('total')
     for k,v in data.items():
         if not monthly:
             total += v[0]
