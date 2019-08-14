@@ -71,12 +71,12 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-    <div class="search-form zbw-box box-full" style="height: 40px;">
+    <div class="search-form zbw-box" style="height: 40px; border-radius: 0 0 8px 8px;">
         <h2 style="float: left; display: inline; padding: 10px;" class="zbw-font zbw-blue">{{ h.SI_number_span(organization.package_count) }} datasets found</h2>
 
         <div class="control-order-by">
         <div style="float: right;" class="search-order">
-            <label for="dashboard-sort" id="sort-label" style="float:left; font-size:14px;">Sort By</label>
+            <label for="dashboard-sort" id="sort-label" style="font-size:14px; padding-right: 5px">Order by</label>
             <select id="dashboard-sort" style="width: 160px;">
                 <option value="views">Views</option>
                 <option value="pub">Published</option>
