@@ -21,7 +21,7 @@ html = """
             }
 
             a[target="_blank"]:after {
-                content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
+                content: url(https://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
                 margin: 0 0 0 5px;
             }
 
