@@ -18,10 +18,8 @@ class DashBoardController(base.BaseController):
         context = {'model': model, 'session': model.Session,
                    'user': c.user or c.author, 'auth_user_obj': c.userobj,
                    'save': 'save' in request.params}
-        return base.render('organization/dashboard.html', extra_vars={'id': id})
         try:
             logic.check_access('dashboard_read', context)
-
             return base.render('organization/dashboard.html', extra_vars={'id': id})
         except logic.NotAuthorized as e:
             url_parts = request.url.split('/')
