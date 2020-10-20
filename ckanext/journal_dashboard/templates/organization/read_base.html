@@ -2,14 +2,17 @@
 
 {% block content_primary_nav %}
     {% set id = h.get_id_from_url(request.url) %}
-
-    {{ h.build_nav_icon('organization_read', _('Datasets'), id=c.group_dict.name or id) }}
-
-    {{ h.build_nav_icon('organization_activity', _('Activity Stream'), id=c.group_dict.name or id) }}
-
-    {{ h.build_nav_icon('organization_about', _('About'), id=c.group_dict.name or id) }}
+    {# group_dict.name #}
+    {{ h.build_nav_icon('journals.read', _('Datasets'), id=id, icon='sitemap') }}
+    {{ h.build_nav_icon('journals.activity', _('Activity Stream'), id=id, icon='clock-o') }}
+    {{ h.build_nav_icon('journals.about', _('About'), id=id, icon='info-circle') }}
 
     {% if h.check_access('dashboard_read') %}
-      {{ h.build_nav_icon('journal_stats', _('Stats'), id=c.group_dict.name or id) }}
+      {{ h.build_nav_icon('dash.dashboard_read', _('Stats'), id=id, icon='bar-chart') }}
     {% endif %}
+{% endblock %}
+
+{% block links %}
+  {#{ super() }}
+  {% include "organization/snippets/feeds.html" %#}
 {% endblock %}

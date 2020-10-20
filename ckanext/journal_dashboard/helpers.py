@@ -1,10 +1,8 @@
 import os
-from pylons import config
 import ckan.model as model
-from urlparse import urlparse
 import ckan.plugins.toolkit as tk
 from datetime import datetime, timedelta
-from ckan.common import request, c, response
+from ckan.common import request, c, config, g
 from collections import OrderedDict, namedtuple
 
 import jinja2
@@ -15,7 +13,9 @@ engine = model.meta.engine
 
 def get_id_from_url(url):
     parts = url.split('/')
-    return parts[-2]
+    if 'stats' in parts:
+        return parts[-2]
+    return parts[-1]
 
 
 def count_org_resources(org):

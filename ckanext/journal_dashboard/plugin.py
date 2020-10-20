@@ -1,28 +1,23 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
+import ckanext.journal_dashboard.views as view
 
-import helpers
+import ckanext.journal_dashboard.helpers as helpers
+from flask import Blueprint
 
-"""
-TODO:
-    * Finish arranging data
-    X Add badges for unpublished/published
-    * Rearrange data (tables?)
-    * Visualization?
-"""
 
 class Journal_DashboardPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IAuthFunctions)
-    plugins.implements(plugins.IRoutes, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
-
-    # IConfigurer
+    plugins.implements(plugins.IBlueprint)
 
     def update_config(self, config_):
+        toolkit.add_public_directory(config_, 'assets')
         toolkit.add_template_directory(config_, 'templates')
         toolkit.add_public_directory(config_, 'public')
         toolkit.add_resource('fanstatic', 'journal-dashboard')
+        toolkit.add_resource('assets', 'dashboard')
 
 
     def get_auth_functions(self):
@@ -49,13 +44,10 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
         }
 
 
-    def before_map(self, map):
-        """
-            new route for journal dash boards
-        """
-        map.connect('journal_stats','/journals/{id}/stats',
-                     controller='ckanext.journal_dashboard.controller:DashBoardController',
-                     action='dashboard_read',
-                     ckan_icon='bar-chart')
+    def get_blueprint(self):
+        dash = Blueprint(u'dash', self.__module__)
+        dash.add_url_rule(u'/journals/<id>/stats',
+                          view_func=view.dashboard_read,
+                          methods=[u'GET'])
 
-        return map
+        return dash

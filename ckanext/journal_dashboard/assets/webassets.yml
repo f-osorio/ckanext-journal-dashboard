@@ -1,0 +1,5 @@
+dashboard-css:
+  contents:
+    - dashboard.css
+  output: journal_dashboard/%(version)s_dashboard.css
+  filters: cssrewrite

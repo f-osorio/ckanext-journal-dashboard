@@ -1,0 +1,12 @@
+.label-published{
+    background: green;
+}
+
+.list_item{
+    font-family: monospace;
+    list-style-type: none;
+}
+
+.flat {
+    margin: 0;
+}
