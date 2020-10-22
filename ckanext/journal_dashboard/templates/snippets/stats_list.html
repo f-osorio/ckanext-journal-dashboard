@@ -18,7 +18,7 @@
     <span class="label label-reauthor flat">Re-Author</span>
 </div>
 <ul id="dashboard_list">
-    {% for package in organization['packages'] %}
+    {% for package in h.get_packages(organization) %}
         <span class="item">
         <li style="margin-top: 10px;">
             <strong>

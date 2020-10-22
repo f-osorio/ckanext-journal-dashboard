@@ -10,3 +10,8 @@
 .flat {
     margin: 0;
 }
+
+ul#dashboard_list,
+ul#dashboard_list > span > ul {
+    margin: 0 0 10px 25px;
+}

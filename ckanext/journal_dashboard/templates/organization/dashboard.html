@@ -5,7 +5,7 @@
 
 {% block breadcrumb_content %}
     <li>
-        {#% link_for _('Journals'), 'journals.index' %#}
+        <a href="/journals">Journals</a>
     </li>
     <li>
         <a href="/journals/{{ organization.name }}">{{ organization.display_name }}</a>

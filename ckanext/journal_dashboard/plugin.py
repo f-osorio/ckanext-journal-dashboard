@@ -5,12 +5,19 @@ import ckanext.journal_dashboard.views as view
 import ckanext.journal_dashboard.helpers as helpers
 from flask import Blueprint
 
+from ckanext.journal_dashboard.command import send
+
 
 class Journal_DashboardPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IBlueprint)
+    plugins.implements(plugins.IClick)
+
+
+    def get_commands(self):
+        return [send]
 
     def update_config(self, config_):
         toolkit.add_public_directory(config_, 'assets')
@@ -41,6 +48,7 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
                 'journal_download_summary': helpers.journal_download_summary,
                 'count_org_resources': helpers.count_org_resources,
                 'get_id_from_url': helpers.get_id_from_url,
+                'get_packages': helpers.get_packages,
         }
 
 

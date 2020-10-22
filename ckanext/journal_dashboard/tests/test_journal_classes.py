@@ -252,7 +252,6 @@ class TestDatasetClass(helpers.FunctionalTestBase):
         target_date = datetime.date.today() + datetime.timedelta(days=30)
         d = jc.Dataset(dataset[0]['id'], target_date)
         r = d.resources
-        print(r[0])
         assert r[0].previous_month_downloads == 2, "Previous dls should be 2: {}".format(r[0].previous_month_downloads)
         assert r[1].previous_month_downloads == 2, "Previous dls should be 2: {}".format(r[1].previous_month_downloads)
 

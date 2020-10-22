@@ -52,15 +52,28 @@ def dashboard_read(context, data_dict=None):
 def get_org(id):
     data = {
                 'id': id,
-                'include_datasets': True
+                'include_datasets': True,
             }
     try:
         org = tk.get_action('organization_show')(None, data)
-    except:
+    except Exception as e:
+        print(f"Error: {e}")
         context = {'user': 'default'}
         org = tk.get_action('organization_show')(context, data)
 
     return org
+
+
+def get_packages(org):
+    org_id = org['id']
+    d1 = {'facet': 'false',
+          'fq': f'+owner_org:"{org_id}"',
+          'rows': 1000,
+          'sort': 'metadata_created desc',
+          'include_private': True}
+    results = tk.get_action('package_search')(None, d1)
+
+    return results['results']
 
 
 def package_tracking(id):
