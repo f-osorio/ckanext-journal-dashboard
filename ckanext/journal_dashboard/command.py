@@ -16,6 +16,7 @@ import ckanext.journal_dashboard.helpers as h
 import ckanext.journal_dashboard.journal_classes as jc
 
 import click
+import ckan.model as model
 
 
 log = logging.getLogger(__name__)
@@ -24,7 +25,6 @@ log = logging.getLogger(__name__)
 """ Creates and sends a report to the journals for their journals items
 
 Usage:
-    /home/edawax/ckanenv/bin/paster --plugin=ckanext-journal-dashbaord...
     report send [journal-name] [recipient] -- gather summary information for a given journal and send a report to the journal editor/manager
 
 Cron:
@@ -35,34 +35,8 @@ Cron:
 max_args = 3
 min_args = 3
 
-import ckan.model as model
 engine = model.meta.engine
 
-"""
-def command(self):
-    self._load_config()
-    import ckan.model as model
-    engine = model.meta.engine
-
-    if not self.args:
-        # default to printing help
-        print(self.usage)
-        return
-
-    cmd = self.args[0]
-    # Do not run load_config yet
-    if cmd == 'rebuild_fast':
-        self.rebuild_fast()
-        return
-
-    self._load_config()
-    if cmd == 'send':
-        journal = self.args[1]
-        address = self.args[2]
-        self.send(engine, journal, address)
-    else:
-        print('Command {} not recognized'.format(cmd))
-"""
 
 def gather_data(engine, journal):
     org = h.get_org(journal)
