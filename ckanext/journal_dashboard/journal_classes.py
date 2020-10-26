@@ -127,4 +127,4 @@ class Resource:
 
 
     def __repr__(self):
-        return "<Resource: {} {} {}>".format(self.name, self.total_downloads, self.url)
+        return f"<Resource: {self.name} {self.total_downloads} {self.url}>"
