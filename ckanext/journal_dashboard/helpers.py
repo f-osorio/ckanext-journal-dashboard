@@ -165,7 +165,7 @@ def journal_download_summary(id, package, engine_check=None):
         JOIN resource as r
             ON r.package_id = p.id
         JOIN tracking_summary as ts
-            ON ts.url = r.url
+            ON ts.url LIKE '%%' || r.url
         WHERE p.owner_org = %(id)s;
         """
     if engine_check is None:

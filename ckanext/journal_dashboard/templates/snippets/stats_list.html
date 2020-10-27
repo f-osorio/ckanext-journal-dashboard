@@ -25,7 +25,7 @@
                 <a href='/dataset/{{ package["name"] }}'>
                     {%- if h.is_published_(package['name']) -%}
                         <span class="label label-published">{{ package['title']|truncate(35) }}</span>
-                    {%- elif h.in_review(package) == 'true' -%}
+                    {%- elif h.in_review(package) == 'reviewers' -%}
                         <span class="label label-review flat">{{ package['title']|truncate(35) }}</span>
                     {%- elif h.in_review(package) == 'reauthor' -%}
                         <span class="label label-reauthor flat">{{ package['title']|truncate(35) }}</span>
