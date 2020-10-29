@@ -17,6 +17,7 @@
     <span class="label label-review flat">Review</span>
     <span class="label label-reauthor flat">Re-Author</span>
 </div>
+{% if h.get_packages(organization)|length > 0 %}
 <ul id="dashboard_list">
     {% for package in h.get_packages(organization) %}
         <span class="item">
@@ -72,10 +73,10 @@
                                 {{ name }}</a> &mdash;
                                 {{ summary[item]['total'] }}
                                 {% if summary[item]['total'] != "" %}
-                                    {% if summary[item]['total']|int > 1%}
-                                        Downloads
-                                    {% else %}
+                                    {% if summary[item]['total']|int == 1 %}
                                         Download
+                                    {% else %}
+                                        Downloads
                                     {% endif %}
                                 {% else %}
                                     0 Downloads
@@ -99,4 +100,7 @@
         </span>
     {% endfor %}
 </ul>
+{% else %}
+    <p class="empty">This journal has no datasets.</p>
+{% endif %}
 </div>
