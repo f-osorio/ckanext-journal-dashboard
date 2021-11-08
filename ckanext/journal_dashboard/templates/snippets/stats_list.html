@@ -17,87 +17,68 @@
     <span class="label label-review flat">Review</span>
     <span class="label label-reauthor flat">Re-Author</span>
 </div>
-{% if h.get_packages(organization)|length > 0 %}
+
+{% set packages = organization.packages %}
+{% if packages|length > 0 %}
 <ul id="dashboard_list">
-    {% for package in h.get_packages(organization) %}
+    {% for pack_data in packages %}
         <span class="item">
         <li style="margin-top: 10px;">
             <strong>
-                <a href='/dataset/{{ package["name"] }}'>
-                    {%- if h.is_published_(package['name']) -%}
-                        <span class="label label-published">{{ package['title']|truncate(35) }}</span>
-                    {%- elif h.in_review(package) == 'reviewers' -%}
-                        <span class="label label-review flat">{{ package['title']|truncate(35) }}</span>
-                    {%- elif h.in_review(package) == 'reauthor' -%}
-                        <span class="label label-reauthor flat">{{ package['title']|truncate(35) }}</span>
+                <a href='/dataset/{{ pack_data.name }}'>
+                    {%- if h.is_published_(pack_data.name) -%}
+                        <span class="label label-published">{{ pack_data.title|truncate(35) }}</span>
+                    {%- elif pack_data.state == 'reviewers' -%}
+                        <span class="label label-review flat">{{ pack_data.title|truncate(35) }}</span>
+                    {%- elif pack_data.state == 'reauthor' -%}
+                        <span class="label label-reauthor flat">{{ pack_data.title|truncate(35) }}</span>
                     {%- else -%}
-                        <span class="label label-inverse">{{ package['title']|truncate(35) }}</span>
+                        <span class="label label-inverse">{{ pack_data.title|truncate(35) }}</span>
                     {%- endif -%}
                 </a>
             </strong>
             &nbsp;&nbsp;&nbsp;
             <span class="views">
-                {% set pack_stat = h.package_tracking(package['id']) %}
-                {% if pack_stat['total'] == 1 %}
-                    {{ pack_stat['total'] }} View
+                {% if pack_data.views == 1 %}
+                    {{ pack_data.views }} View
                 {% else %}
-                    {{ pack_stat['total'] }} Views
+                    {{ pack_data.views }} Views
                 {% endif %}
             </span>
         </li>
         <ul>
-            {% if package['num_resources'] > 0 %}
-                {% set summary = h.journal_download_summary(organization['id'], package['id']) %}
-                {% for item in summary %}
-                    {% if summary[item]['name']|length > 21 %}
-                        {% set name = [summary[item]['name'][:9], summary[item]['name'][-9:]]|join('...') %}
+            {% for resource in pack_data.resources %}
+                {% if resource.name|length > 20 %}
+                    {% set name = [resource.name[:9], resource.name[-9:]]|join('...')%}
+                {% else %}
+                    {% set name = resource.name %}
+                {% endif %}
+
+                {% if resource.url|length > 20 %}
+                    {% set url = [resource.url[:10], resource.url[-10:]]|join('...')%}
+                {% else %}
+                    {% set url = resource.url %}
+                {% endif %}
+
+                {% if name|length < 1 %}
+                    {% set spaces = "&nbsp;"* (20 - url|length) %}
+                {% else %}
+                    {% set spaces = "&nbsp;"* (20 - name|length) %}
+                {% endif %}
+
+                <li class="list_item">{{ spaces|safe }}
+                    <a href="/dataset/{{ pack_data.id }}/resource/{{ resource.id }}">{{ name }}</a> &mdash;
+                    {{ resource.total_downloads }}
+                    {% if resource.total_downloads|int == 1 %}
+                        Download
                     {% else %}
-                        {% set name = summary[item]['name'] %}
+                        Downloads
                     {% endif %}
+                </li>
 
-                    {% if summary[item]['url']|length > 21 %}
-                        {% set url =[summary[item]['url'][:10],summary[item]['url'][-10:]]|join('.') %}
-                    {% else %}
-                        {% set url = summary[item]['url'] %}
-                    {% endif %}
-
-                    {% if name|length < 1 %}
-                        {% set spaces = "&nbsp;"* (20 - url|length) %}
-                    {% else %}
-                        {% set spaces = "&nbsp;"* (20 - name|length) %}
-                    {% endif %}
-
-                    <li class="list_item">{{ spaces|safe }}
-                        <a href="/dataset/{{ summary[item]['package_id'] }}/resource/{{ summary[item]['id'] }}">
-                            {% if summary[item]['format']|length > 0 %}
-                                {{ name }}</a> &mdash;
-                                {{ summary[item]['total'] }}
-                                {% if summary[item]['total'] != "" %}
-                                    {% if summary[item]['total']|int == 1 %}
-                                        Download
-                                    {% else %}
-                                        Downloads
-                                    {% endif %}
-                                {% else %}
-                                    0 Downloads
-                                {% endif %}
-                            {% else %}
-                                {% if name != '' %}
-                                    {{ name }}
-                                {% else %}
-                                    {{ url }}
-                                {% endif %}
-                                </a> <a href="{{ summary[item]['url'] }}" target="_blank"></a>
-                            {% endif %}
-                    </li>
-                {% endfor %}
-            {% else %}
-                {% set spaces = "&nbsp;"* (20) %}
-
-                <li class="list_item">{{ spaces|safe }}0 Resources</li>
-            {% endif %}
-        </ul>
-        </span>
+            {% endfor %}
+            </ul>
+            </span>
     {% endfor %}
 </ul>
 {% else %}

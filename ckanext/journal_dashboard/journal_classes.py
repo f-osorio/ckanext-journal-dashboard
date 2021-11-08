@@ -7,18 +7,65 @@ import ckan.plugins.toolkit as tk
 
 from datetime import datetime, timedelta, date
 
-engine = model.meta.engine
+
+class Organization:
+    def __init__(self, id, date=date.today()):
+        self.data = self._get_org(id)
+        self.date = date
+        self.name = self.data['name']
+        self.title = self.data['title']
+        self.display_name = self.data['title']
+        self.id = self.data['id']
+        self.image_display_url = self.data['image_display_url']
+        self.description = self.data['description']
+        self.packages = self._get_packages()
+        self.package_count = len(self.packages)
+        self.resource_count = sum([len(p.resources) for p in self.packages])
+        self.total_views = sum([p.views for p in self.packages])
+        self.total_downloads = sum(p.total_downloads for p in self.packages)
+
+
+    def _get_org(self, id):
+        data = {'id': id, 'include_datasets': True}
+        try:
+            org = tk.get_action('organization_show')(None, data)
+        except Exception:
+            context = {'user': 'default'}
+            org = tk.get_action('organization_show')(context, data)
+        return org
+
+
+    def _get_packages(self):
+        out = []
+        org_id = self.id
+        d1 = {'facet': 'false',
+            'fq': f'+owner_org:"{org_id}"',
+            'rows': 1000,
+            'sort': 'metadata_created desc',
+            'include_private': True}
+        results = tk.get_action('package_search')({'ignore_auth': True}, d1)
+
+        for result in results['results']:
+            out.append(Dataset(result['id']))
+        return out
+
+
+    def __repr__(self):
+        return f"<Organization: {self.name}, Packages: {self.package_count}>"
 
 
 class Dataset:
-    def __init__(self, engine, id, date=date.today()):
+    def __init__(self, id, date=date.today()):
         data = self._get_dataset(id)
-        self.engine = engine
+        self.engine = model.meta.engine
         self.date = date
-        self.name = data['title']
+        self.state = getattr(data, 'dara_edawax_review', False)
+        self.name = data['name']
+        self.title = data['title']
         self.resources = self._populate_resources(data)
         self.owner = data['owner_org']
         self.views = data['tracking_summary']['total']
+        self.views_recent = data['tracking_summary']['recent']
         self.private = data['private']
         self.total_downloads = self._get_total_downloads()
         self.previous_month_views = self._get_previous_views(id, date)
@@ -28,11 +75,10 @@ class Dataset:
         data = {'id': id, 'include_tracking': True}
         try:
             dataset = tk.get_action('package_show')(None, data)
-        except:
+        except Exception:
             context = {'user': 'default'}
             dataset = tk.get_action('package_show')(context, data)
         return dataset
-
 
     def _populate_resources(self, data):
         out = []
@@ -87,17 +133,18 @@ class Dataset:
 class Resource:
     def __init__(self, engine, id, date=date.today()):
         data = self._get_resource(id)
+        self.id = id
         self.engine = engine
         self.name = data['name']
         self.url = data['url']
         self.format = data['format']
         self.total_downloads = data['tracking_summary']['total']
-        self.recent_downlaods = data['tracking_summary']['recent']
+        self.recent_downloads = data['tracking_summary']['recent']
         self.previous_month_downloads = self._get_last_month_downloads(self.url, date)
         if config.get('ckan.site_url', '') not in self.url:
-            self.total_downloads = -1
-            self.recent_downlaods = -1
-            self.previous_month_downloads = -1
+            self.total_downloads = 0
+            self.recent_downloads = 0
+            self.previous_month_downloads = 0
 
 
     def _get_resource(self, id):

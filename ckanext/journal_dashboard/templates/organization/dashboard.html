@@ -52,17 +52,17 @@
                     </dl>
                     <dl>
                         <dt>{{ _('Resources') }}</dt>
-                        <dd>{{ h.count_org_resources(organization['id']) }}</dd>
+                        <dd>{{ organization.resource_count }}</dd>
                     </dl>
                     {% endif %}
                     <dl>
                         <dt>{{ _('Total Views') }}</dt>
-                        <dd>{{ h.total_views_across_journal_datasets(organization['id']) }}</dd>
+                        <dd>{{ organization.total_views }}</dd>
                     </dl>
 
                     <dl>
                         <dt>{{ _('Total Downloads') }}</dt>
-                        <dd>{{ h.total_downloads_journal(organization['id']) }}</dd>
+                        <dd>{{ organization.total_downloads }}</dd>
                     </dl>
 
                 </div>

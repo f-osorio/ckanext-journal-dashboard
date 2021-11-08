@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
-import csv
 import smtplib
 import logging
 from time import time
-from tabulate import tabulate
 
 from email import utils
 from email.header import Header
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from ckan.common import config
+from tabulate import tabulate
+
 import ckanext.journal_dashboard.emails as e
 import ckanext.journal_dashboard.helpers as h
-import ckanext.journal_dashboard.journal_classes as jc
-
 import click
-import ckan.model as model
+from ckan.common import config
 
 
 log = logging.getLogger(__name__)
@@ -25,7 +22,9 @@ log = logging.getLogger(__name__)
 """ Creates and sends a report to the journals for their journals items
 
 Usage:
-    report send [journal-name] [recipient] -- gather summary information for a given journal and send a report to the journal editor/manager
+    report send [journal-name] [recipient]
+        -- gather summary information for a given
+           journal and send a report to the journal editor/manager
 
 Cron:
     --plugin=ckanext-journal-dashboard
@@ -35,35 +34,36 @@ Cron:
 max_args = 3
 min_args = 3
 
-engine = model.meta.engine
 
-
-def gather_data(engine, journal):
+def gather_data(journal):
     org = h.get_org(journal)
-    packages = org['packages']
+    packages = org.packages
+    packages = sorted(packages, key=lambda x: x.views, reverse=True)
 
-    views_total = h.total_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
-    downloads_total = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine)
 
-    views_monthly = h.last_month_views_across_journal_datasets(packages[0]['owner_org'], engine_check=engine)
-    downloads_monthly = h.total_downloads_journal(packages[0]['owner_org'], engine_check=engine, monthly=True)
+    num_resources = sum([len(p.resources) for p in packages])
 
-    package_list = []
-    for package in packages:
-        package_list.append(jc.Dataset(engine, package['id']))
-        package_list = sorted(package_list, key=lambda x: x.views, reverse=True)
-
-    num_resources = sum([len(p.resources) for p in package_list])
+    views_total = 0
+    downloads_total = 0
+    views_monthly = 0
+    downloads_monthly = 0
 
     summary = [['Datasets', 'Resources', 'Total Views', 'Total Downloads'],
                 [len(packages), num_resources, views_total, downloads_total]]
 
+    for package in packages:
+        views_total += package.views
+        views_monthly += package.previous_month_views
+        for resource in package.resources:
+            downloads_total += resource.total_downloads
+            downloads_monthly += resource.previous_month_downloads
+
     data = {
                 'prefix': config.get('ckan.site_url'),
-                'journal': org['title'],
+                'journal': org.title,
                 'summary': summary,
-                'packages_text': create_main_text(package_list),
-                'packages': create_main_table(package_list),
+                'packages_text': create_main_text(packages),
+                'packages': create_main_table(packages),
                 'package_num': len(packages),
                 'package_resources': num_resources,
                 'package_view_total': views_total,
@@ -94,7 +94,8 @@ def create_main_text(packages):
     return out
 
 def create_main_table(packages):
-    headers = ['Published?*', 'Data Submission', 'Views', 'Resource', 'Downloads (Last 30 Days)', 'Downloads (Total)']
+    headers = ['Published?*', 'Data Submission', 'Views',
+               'Resource', 'Downloads (Last 30 Days)', 'Downloads (Total)']
     data = []
     for package in packages:
         data += package.as_list()
@@ -107,13 +108,15 @@ def create_main_table(packages):
 @click.argument('journal')
 @click.argument('address')
 def send(journal, address):
-    data = gather_data(engine, journal)
+    data = gather_data(journal)
 
     html = get_html()
     text = get_text()
 
     text = text.format(**data)
-    html = html.format(summary_table=tabulate(data['summary'], headers='firstrow', tablefmt='html'), main_table=data['packages'], **data)
+    html = html.format(summary_table=tabulate(data['summary'],
+                        headers='firstrow', tablefmt='html'),
+                        main_table=data['packages'], **data)
 
     message = MIMEMultipart('alternative', None, [MIMEText(text), MIMEText(html, 'html')])
 
@@ -125,6 +128,7 @@ def send(journal, address):
 
     mail_from = config.get('smtp.mail_from')
 
+    #"""
     try:
         smtp_server = config.get('smtp.test_server', config.get('smtp.server'))
         smtp_connection = smtplib.SMTP(smtp_server)
@@ -136,6 +140,7 @@ def send(journal, address):
         log.error(f"Mail to {address} could not be sent")
         log.error(e)
         return False
+    #"""
 
 
 def get_html():

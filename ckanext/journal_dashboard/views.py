@@ -15,7 +15,7 @@ def dashboard_read(id):
     context = {'model': model, 'session': model.Session,
                 'user': g.user or g.author, 'auth_user_obj': g.userobj,
                 'save': 'save' in request.params}
-    return base.render('organization/dashboard.html', extra_vars={'id': id})
+    #return base.render('organization/dashboard.html', extra_vars={'id': id})
 
     try:
         logic.check_access('dashboard_read', context)
@@ -27,4 +27,5 @@ def dashboard_read(id):
         h.redirect_to('dataset.edit', id=journal_id)
     except Exception as e:
         print(e)
+        h.flash_error("Something went wrong loading the page, contact the admins.")
         base.abort(401, _('Not authorized to access this page'))

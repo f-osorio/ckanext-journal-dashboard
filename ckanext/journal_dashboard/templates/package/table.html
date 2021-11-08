@@ -24,13 +24,19 @@
         {% else %}
         <tr>
         {% endif %}
+            {# if it's a dataset#}
             {% if row[0] != '' %}
                 <td>{{ row[0] == False }}</td>
-                <td>{{ row[1]|truncate(25, True) }}</td>
+                {% if row[1]|length > 25 %}
+                    <td>{{ row[1]|truncate(25, True) }}</td>
+                {% else %}
+                    <td>{{ row[1] }}</td>
+                {% endif %}
                 <td>{{ row[2] }}</td>
                 <td>{{ row[3] }}</td>
                 <td>{{ row[4] }}</td>
             {% else %}
+                {# otherwise it's a resource #}
                 <td>{{ row[0] }}</td>
                 <td>{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>

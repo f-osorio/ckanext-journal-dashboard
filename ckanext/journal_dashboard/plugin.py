@@ -38,17 +38,10 @@ class Journal_DashboardPlugin(plugins.SingletonPlugin):
         """ template helper functions """
         return {
                 'get_org': helpers.get_org,
-                'get_resources': helpers.get_resources,
-                'resource_details': helpers.resource_details,
-                'package_tracking': helpers.package_tracking,
-                'journal_resource_downloads': helpers.journal_resource_downloads,
                 'is_published_': helpers.is_published_,
-                'total_views_across_journal_datasets': helpers.total_views_across_journal_datasets,
-                'total_downloads_journal': helpers.total_downloads_journal,
-                'journal_download_summary': helpers.journal_download_summary,
-                'count_org_resources': helpers.count_org_resources,
                 'get_id_from_url': helpers.get_id_from_url,
-                'get_packages': helpers.get_packages,
+                'get_data': helpers.get_data,
+                'get_org': helpers.get_org,
         }
 
 
