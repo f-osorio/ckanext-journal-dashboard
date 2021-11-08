@@ -1,17 +1,13 @@
-"""
-
-"""
-from ckan.common import config
+from datetime import timedelta, date
 import ckan.model as model
 import ckan.plugins.toolkit as tk
-
-from datetime import datetime, timedelta, date
+from ckan.common import config
 
 
 class Organization:
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, id, date=date.today()):
         self.data = self._get_org(id)
-        self.date = date
         self.name = self.data['name']
         self.title = self.data['title']
         self.display_name = self.data['title']
@@ -55,6 +51,7 @@ class Organization:
 
 
 class Dataset:
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, id, date=date.today()):
         data = self._get_dataset(id)
         self.engine = model.meta.engine
@@ -131,6 +128,7 @@ class Dataset:
 
 
 class Resource:
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, engine, id, date=date.today()):
         data = self._get_resource(id)
         self.id = id
