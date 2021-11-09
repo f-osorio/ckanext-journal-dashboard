@@ -26,7 +26,7 @@ class Organization:
         try:
             org = tk.get_action('organization_show')(None, data)
         except Exception:
-            context = {'user': 'default'}
+            context = {'user': 'default', 'ignore_auth': True}
             org = tk.get_action('organization_show')(context, data)
         return org
 
@@ -73,7 +73,7 @@ class Dataset:
         try:
             dataset = tk.get_action('package_show')(None, data)
         except Exception:
-            context = {'user': 'default'}
+            context = {'user': 'default', 'ignore_auth': True}
             dataset = tk.get_action('package_show')(context, data)
         return dataset
 
@@ -150,7 +150,7 @@ class Resource:
         try:
             res = tk.get_action('resource_show')(None, data)
         except Exception as e:
-            context = {'user': 'default'}
+            context = {'user': 'default', 'ignore_auth': True}
             res = tk.get_action('resource_show')(context, data)
         return res
 
