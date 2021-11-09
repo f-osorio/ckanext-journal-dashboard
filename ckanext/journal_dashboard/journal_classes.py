@@ -56,6 +56,7 @@ class Dataset:
         data = self._get_dataset(id)
         self.engine = model.meta.engine
         self.date = date
+        self.id = id
         self.state = getattr(data, 'dara_edawax_review', False)
         self.name = data['name']
         self.title = data['title']
