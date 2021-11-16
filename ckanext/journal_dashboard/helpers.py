@@ -36,8 +36,11 @@ def dashboard_read(context, data_dict=None):
             'msg': "Not authorized to view page."}
 
 
-def get_org(id):
-    return jc.Organization(id)
+def get_org(id, source='cmd'):
+    print('Getting')
+    org = jc.Organization(id, source)
+    print('Finished')
+    return org
 
 
 def is_published_(name):

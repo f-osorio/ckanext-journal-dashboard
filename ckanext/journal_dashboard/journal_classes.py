@@ -3,10 +3,13 @@ import ckan.model as model
 import ckan.plugins.toolkit as tk
 from ckan.common import config
 
+import time
+
 
 class Organization:
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, id, date=date.today()):
+    def __init__(self, id, source, date=date.today()):
+        print('ORG')
         self.data = self._get_org(id)
         self.name = self.data['name']
         self.title = self.data['title']
@@ -14,7 +17,7 @@ class Organization:
         self.id = self.data['id']
         self.image_display_url = self.data['image_display_url']
         self.description = self.data['description']
-        self.packages = self._get_packages()
+        self.packages = self._get_packages(source)
         self.package_count = len(self.packages)
         self.resource_count = sum([len(p.resources) for p in self.packages])
         self.total_views = sum([p.views for p in self.packages])
@@ -31,7 +34,7 @@ class Organization:
         return org
 
 
-    def _get_packages(self):
+    def _get_packages(self, source):
         out = []
         org_id = self.id
         d1 = {'facet': 'false',
@@ -42,7 +45,7 @@ class Organization:
         results = tk.get_action('package_search')({'ignore_auth': True}, d1)
 
         for result in results['results']:
-            out.append(Dataset(result['id']))
+            out.append(Dataset(result['id'], source))
         return out
 
 
@@ -52,7 +55,8 @@ class Organization:
 
 class Dataset:
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, id, date=date.today()):
+    def __init__(self, id, source, date=date.today()):
+        start = time.time()
         data = self._get_dataset(id)
         self.engine = model.meta.engine
         self.date = date
@@ -60,14 +64,15 @@ class Dataset:
         self.state = getattr(data, 'dara_edawax_review', False)
         self.name = data['name']
         self.title = data['title']
-        self.resources = self._populate_resources(data)
+        self.resources = self._populate_resources(data, source)
         self.owner = data['owner_org']
         self.views = data['tracking_summary']['total']
         self.views_recent = data['tracking_summary']['recent']
         self.private = data['private']
         self.total_downloads = self._get_total_downloads()
         self.previous_month_views = self._get_previous_views(id, date)
-
+        end = time.time()
+        print(f"\tDuration: {end-start}")
 
     def _get_dataset(self, id):
         data = {'id': id, 'include_tracking': True}
@@ -78,11 +83,16 @@ class Dataset:
             dataset = tk.get_action('package_show')(context, data)
         return dataset
 
-    def _populate_resources(self, data):
+    def _populate_resources(self, data, source):
         out = []
-        for resource in data['resources']:
-            out.append(Resource(self.engine, resource['id'], self.date))
-        out = sorted(out, key=lambda x: x.total_downloads, reverse=True)
+        print('#############')
+        print(source)
+        print(len(data['resources']))
+        if source == 'cmd' or len(data['resources']) < 11:
+            print('HERE')
+            for resource in data['resources']:
+                out.append(Resource(self.engine, resource['id'], self.date))
+            out = sorted(out, key=lambda x: x.total_downloads, reverse=True)
         return out
 
 
@@ -131,11 +141,12 @@ class Dataset:
 class Resource:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine, id, date=date.today()):
+        start = time.time()
         data = self._get_resource(id)
         self.id = id
         self.engine = engine
-        self.name = data['name']
         self.url = data['url']
+        self.name = self.get_name(data['name'])
         self.format = data['format']
         self.total_downloads = data['tracking_summary']['total']
         self.recent_downloads = data['tracking_summary']['recent']
@@ -144,6 +155,18 @@ class Resource:
             self.total_downloads = 0
             self.recent_downloads = 0
             self.previous_month_downloads = 0
+        end = time.time()
+        print(f'\t\tDuration: {end-start}')
+
+
+    def get_name(self, name):
+        try:
+            if name == '':
+                parts = self.url.split('/')
+                name = parts[-1]
+        except Exception:
+            pass
+        return name
 
 
     def _get_resource(self, id):
