@@ -1,7 +1,7 @@
 {% ckan_extends %}
 
 {% block content_primary_nav %}
-    {% set id = h.get_id_from_url(request.url) %}
+    {% set id = h.get_id_from_url(request.url).split('?')[0] %}
     {# group_dict.name #}
     {{ h.build_nav_icon('journals.read', _('Datasets'), id=id, icon='sitemap') }}
     {{ h.build_nav_icon('journals.activity', _('Activity Stream'), id=id, icon='clock-o') }}
