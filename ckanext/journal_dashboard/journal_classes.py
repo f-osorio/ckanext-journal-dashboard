@@ -9,7 +9,6 @@ import time
 class Organization:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, id, source, date=date.today()):
-        print('ORG')
         self.data = self._get_org(id)
         self.name = self.data['name']
         self.title = self.data['title']
@@ -21,7 +20,7 @@ class Organization:
         self.package_count = len(self.packages)
         self.resource_count = sum([len(p.resources) for p in self.packages])
         self.total_views = sum([p.views for p in self.packages])
-        self.total_downloads = sum(p.total_downloads for p in self.packages)
+        self.total_downloads = sum([p.total_downloads for p in self.packages])
 
 
     def _get_org(self, id):
@@ -56,7 +55,6 @@ class Organization:
 class Dataset:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, id, source, date=date.today()):
-        start = time.time()
         data = self._get_dataset(id)
         self.engine = model.meta.engine
         self.date = date
@@ -71,8 +69,6 @@ class Dataset:
         self.private = data['private']
         self.total_downloads = self._get_total_downloads()
         self.previous_month_views = self._get_previous_views(id, date)
-        end = time.time()
-        print(f"\tDuration: {end-start}")
 
     def _get_dataset(self, id):
         data = {'id': id, 'include_tracking': True}
@@ -85,11 +81,7 @@ class Dataset:
 
     def _populate_resources(self, data, source):
         out = []
-        print('#############')
-        print(source)
-        print(len(data['resources']))
         if source == 'cmd' or len(data['resources']) < 11:
-            print('HERE')
             for resource in data['resources']:
                 out.append(Resource(self.engine, resource['id'], self.date))
             out = sorted(out, key=lambda x: x.total_downloads, reverse=True)
@@ -141,7 +133,6 @@ class Dataset:
 class Resource:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine, id, date=date.today()):
-        start = time.time()
         data = self._get_resource(id)
         self.id = id
         self.engine = engine
@@ -155,8 +146,6 @@ class Resource:
             self.total_downloads = 0
             self.recent_downloads = 0
             self.previous_month_downloads = 0
-        end = time.time()
-        print(f'\t\tDuration: {end-start}')
 
 
     def get_name(self, name):
