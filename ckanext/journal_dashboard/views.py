@@ -20,7 +20,8 @@ def dashboard_read(id):
     journal_id = url_parts[-2]
     try:
         logic.check_access('dashboard_read', context)
-        return base.render('organization/dashboard.html', extra_vars={'id': id})
+        #return base.render('organization/dashboard.html', extra_vars={'id': id})
+        return base.render('organization/test.html', extra_vars={'id': id})
     except logic.NotAuthorized as e:
         h.flash_error("You don't have access to view this page.")
         return h.redirect_to('journals.read', id=journal_id)

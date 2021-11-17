@@ -1,12 +1,207 @@
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 import ckan.model as model
 import ckan.plugins.toolkit as tk
 from ckan.common import config
 
 import time
 
+"""
+# packages
+# date: %(time)s::date
+select p.name, p.title, ts.count, ts.running_total, ts.tracking_date
+from "group" as g
+join package as p
+    on p.owner_org = g.id
+join tracking_summary as ts
+    on ts.url LIKE '%/dataset/' || p.name
+where g.id = 'ffd970f3-110e-4247-91a4-21e4dc01b6d6'
+    and ts.tracking_date >= '2021-10-17'
+ORDER BY p.name, ts.tracking_date DESC;
+"""
+
+"""
+# resources
+select r.name, ts.running_total, ts.tracking_date
+from "group" as g
+join package as p
+    on p.owner_org = g.id
+join resource as r
+    on r.package_id = p.id
+join tracking_summary as ts
+    on ts.url LIKE '%resource/' || r.id ||'/download/' || r.name
+where g.id = 'ffd970f3-110e-4247-91a4-21e4dc01b6d6'
+ORDER BY p.name, r.name, ts.tracking_date;
+"""
 
 class Organization:
+    def __init__(self, id, source, date=date.today()):
+        self.engine = model.meta.engine
+        self.data = self._get_org(id)
+        self.name = self.data['name']
+        self.title = self.data['title']
+        self.display_name = self.data['title']
+        self.id = self.data['id']
+        self.image_display_url = self.data['image_display_url']
+        self.description = self.data['description']
+        resources, count = self._get_resources()
+        self.resources = resources
+        self.resource_count = count
+        self.packages = [Dataset(name, data) for name, data in  self._get_packages().items()]
+        self.package_count = len(self.packages)
+        self.total_views = sum([p.total_views for p in self.packages])
+        self.total_downloads = sum(p.total_downloads for p in self.packages)
+
+
+    def _get_org(self, id):
+        print('_get_org')
+        data = {'id': id, 'include_datasets': True}
+        try:
+            org = tk.get_action('organization_show')(None, data)
+        except Exception:
+            context = {'user': 'default', 'ignore_auth': True}
+            org = tk.get_action('organization_show')(context, data)
+        return org
+
+
+    def _get_packages(self):
+        packages = {}
+        target_date = date.today() - timedelta(days=30)
+        sql = """
+            select p.name, p.title, p.url, p.id, p.state, p.private, p.owner_org,
+                CASE when ts.count is NULL then 0 else ts.count END as count,
+                CASE when ts.running_total is NULL then 0 else ts.running_total END as running_total,
+                CASE when ts.tracking_date is NULL then '1900-01-01'::date else ts.tracking_date END as tracking_date
+            from "group" as g
+            join package as p
+                on p.owner_org = g.id
+            left join tracking_summary as ts
+                on ts.url ILIKE '%%/dataset/' || p.name
+            where g.id = %(id)s and p.state = 'active'
+            ORDER BY p.name, ts.tracking_date DESC;
+        """
+        results = self.engine.execute(sql, id=self.id).fetchall()
+        for package in results:
+            name = package[0]
+            if name in packages.keys():
+                if packages[name]['total'] < package[8]:
+                    packages[name]['total'] = package[8]
+                if package[9] >= target_date:
+                    packages[name]['recent'] += package[7]
+            else:
+                packages[name] = {'title': package[1],
+                                  'url': package[2],
+                                  'id': package[3],
+                                  'state': package[4],
+                                  'private': package[5],
+                                  'owner': package[6],
+                                  'total': package[8],
+                                  'recent': 0 if package[9] < target_date else package[7],
+                                  'resources': self.resources[name] if name in self.resources.keys() else None
+                                    }
+
+        return packages
+
+
+    def _get_resources(self):
+        resources = {}
+        target_date = date.today() - timedelta(days=30)
+        sql = """
+            select p.name, r.name, r.url,
+                CASE when ts.running_total is NULL then 0 else ts.running_total END as running_total,
+                CASE when ts.count is NULL then 0 else ts.count END as count,
+                CASE when ts.tracking_date is NULL then '1900-01-01'::date else ts.tracking_date END as tracking_date,
+                r.id, r.format
+            from "group" as g
+            join package as p
+                on p.owner_org = g.id
+            join resource as r
+                on r.package_id = p.id
+            left join tracking_summary as ts
+                on ts.url ILIKE '%%resource/' || r.id ||'/download/' || r.url
+            where g.id = %(id)s and p.state = 'active' and r.state != 'deleted'
+            ORDER BY p.name, r.name, ts.tracking_date;
+        """
+        results = self.engine.execute(sql, id=self.id).fetchall()
+        count = 0
+        for resource in results:
+            name = resource[0]
+            res_name = resource[1] if resource[1] != '' else resource[2]
+            res_id = resource[6]
+            if name in resources.keys():
+                if res_id not in resources[name].keys():
+                    count += 1
+                    resources[name][res_id] = {
+                        'name': res_name,
+                        'id': resource[6],
+                        'format': resource[7],
+                        'url': resource[2],
+                        'total': resource[3],
+                        'recent': 0 if resource[5] < target_date else resource[4],
+                    }
+                else:
+                    if resources[name][res_id]['total'] < resource[3]:
+                        resources[name][res_id]['total'] = resource[3]
+                    if resource[5] >= target_date:
+                        resources[name][res_id]['recent'] += resource[4]
+            else:
+                count += 1
+                resources[name] = {res_id: {
+                        'name': res_name,
+                        'id': resource[6],
+                        'format': resource[7],
+                        'url': resource[2],
+                        'total': resource[3],
+                        'recent': 0 if resource[5] < target_date else resource[4],
+                }}
+
+        return resources, count
+
+
+    def __repr__(self):
+        return f"<Journal: {self.name} {self.package_count} packages>"
+
+
+class Dataset:
+    def __init__(self, name, data):
+        self.name = name
+        self.title  = data['title']
+        self.url = data['url']
+        self.id = data['id']
+        self.state = data['state']
+        self.private = data['private']
+        self.owner = data['owner']
+        self.total_views = data['total']
+        self.recent_views = data['recent']
+        if data['resources'] is not None:
+            self.resources = [Resource(id, d) for id, d in  data['resources'].items()]
+            self.total_downloads = sum([resource.total_downloads for resource in self.resources if type(resource.total_downloads) == int])
+        else:
+            self.resources = None
+            self.total_downloads = 0
+
+    def __repr__(self):
+        return f"<Dataset: {self.name}>"
+
+
+class Resource:
+    def __init__(self, id, data):
+        self.data = data
+        self.id = data['id']
+        self.url = data['url']
+        self.name = data['name']
+        self.format = data['format']
+        self.total_downloads = data['total']
+        self.recent_downloads = data['recent']
+
+
+    def __repr__(self):
+        return f"<Resource: {self.name} {self.url} -- total: {self.total_downloads}, recent: {self.recent_downloads}>"
+
+
+"""
+The following classes took too long to populate if there are a lot of resources
+"""
+class _Organization:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, id, source, date=date.today()):
         print('ORG')
@@ -53,7 +248,7 @@ class Organization:
         return f"<Organization: {self.name}, Packages: {self.package_count}>"
 
 
-class Dataset:
+class _Dataset:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, id, source, date=date.today()):
         start = time.time()
@@ -85,11 +280,7 @@ class Dataset:
 
     def _populate_resources(self, data, source):
         out = []
-        print('#############')
-        print(source)
-        print(len(data['resources']))
         if source == 'cmd' or len(data['resources']) < 11:
-            print('HERE')
             for resource in data['resources']:
                 out.append(Resource(self.engine, resource['id'], self.date))
             out = sorted(out, key=lambda x: x.total_downloads, reverse=True)
@@ -137,11 +328,9 @@ class Dataset:
         return out
 
 
-
-class Resource:
+class _Resource:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine, id, date=date.today()):
-        start = time.time()
         data = self._get_resource(id)
         self.id = id
         self.engine = engine
@@ -155,8 +344,6 @@ class Resource:
             self.total_downloads = 0
             self.recent_downloads = 0
             self.previous_month_downloads = 0
-        end = time.time()
-        print(f'\t\tDuration: {end-start}')
 
 
     def get_name(self, name):

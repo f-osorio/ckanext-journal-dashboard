@@ -37,9 +37,12 @@ def dashboard_read(context, data_dict=None):
 
 
 def get_org(id, source='cmd'):
-    print('Getting')
+    print('Getting - get_org')
     org = jc.Organization(id, source)
-    print('Finished')
+    #print(org)
+    #print(org.resources.keys())
+    print(f'!!!!!!!!!! {org.packages}')
+    print('Finished - get_org')
     return org
 
 

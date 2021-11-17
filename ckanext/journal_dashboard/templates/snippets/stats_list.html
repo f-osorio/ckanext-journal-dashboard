@@ -41,14 +41,15 @@ Note: Datasets with more than 10 resources are not displayed fully. Contact a si
             </strong>
             &nbsp;&nbsp;&nbsp;
             <span class="views">
-                {% if pack_data.views == 1 %}
-                    {{ pack_data.views }} View
+                {% if pack_data.total_views == 1 %}
+                    {{ pack_data.total_views }} View
                 {% else %}
-                    {{ pack_data.views }} Views
+                    {{ pack_data.total_views }} Views
                 {% endif %}
             </span>
         </li>
         <ul>
+            {% if pack_data.resources is not none %}
             {% for resource in pack_data.resources %}
                 {% if resource.name|length > 20 %}
                     {% set name = [resource.name[:9], resource.name[-9:]]|join('...')%}
@@ -79,6 +80,9 @@ Note: Datasets with more than 10 resources are not displayed fully. Contact a si
                 </li>
 
             {% endfor %}
+            {% else %}
+                No Resources
+            {% endif %}
             </ul>
             </span>
     {% endfor %}
