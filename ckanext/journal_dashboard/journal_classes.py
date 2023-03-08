@@ -5,33 +5,7 @@ from ckan.common import config
 
 import time
 
-"""
-# packages
-# date: %(time)s::date
-select p.name, p.title, ts.count, ts.running_total, ts.tracking_date
-from "group" as g
-join package as p
-    on p.owner_org = g.id
-join tracking_summary as ts
-    on ts.url LIKE '%/dataset/' || p.name
-where g.id = 'ffd970f3-110e-4247-91a4-21e4dc01b6d6'
-    and ts.tracking_date >= '2021-10-17'
-ORDER BY p.name, ts.tracking_date DESC;
-"""
 
-"""
-# resources
-select r.name, ts.running_total, ts.tracking_date
-from "group" as g
-join package as p
-    on p.owner_org = g.id
-join resource as r
-    on r.package_id = p.id
-join tracking_summary as ts
-    on ts.url LIKE '%resource/' || r.id ||'/download/' || r.name
-where g.id = 'ffd970f3-110e-4247-91a4-21e4dc01b6d6'
-ORDER BY p.name, r.name, ts.tracking_date;
-"""
 
 class Organization:
     def __init__(self, id, source, date=date.today()):
@@ -53,7 +27,6 @@ class Organization:
 
 
     def _get_org(self, id):
-        print('_get_org')
         data = {'id': id, 'include_datasets': True}
         try:
             org = tk.get_action('organization_show')(None, data)
@@ -105,6 +78,7 @@ class Organization:
     def _get_resources(self):
         resources = {}
         target_date = date.today() - timedelta(days=30)
+        print(f'################# {target_date}')
         sql = """
             select p.name, r.name, r.url,
                 CASE when ts.running_total is NULL then 0 else ts.running_total END as running_total,
@@ -172,12 +146,34 @@ class Dataset:
         self.owner = data['owner']
         self.total_views = data['total']
         self.recent_views = data['recent']
+        print(data['resources'])
         if data['resources'] is not None:
             self.resources = [Resource(id, d) for id, d in  data['resources'].items()]
             self.total_downloads = sum([resource.total_downloads for resource in self.resources if type(resource.total_downloads) == int])
         else:
             self.resources = None
             self.total_downloads = 0
+
+
+    def as_list(self):
+        """
+            Combine the dataset and resource information into a list of
+            lists. The first row is for the dataset, the following for resources.
+            Need to add empty spaces in the lists soo they line up.
+                Dataset: published, name, empty, empty, empty
+                Resources: empty, empty, name, last month, total
+        """
+        out=[[self.private, self.name, self.total_views, len(self.resources),'','']]
+        if self.private:
+            return out
+
+        for resource in self.resources:
+            tmp = resource.as_list()
+            tmp.insert(0, '')
+            tmp.insert(0, '')
+            tmp.insert(0, '')
+            out.append(tmp)
+        return out
 
     def __repr__(self):
         return f"<Dataset: {self.name}>"
@@ -192,6 +188,10 @@ class Resource:
         self.format = data['format']
         self.total_downloads = data['total']
         self.recent_downloads = data['recent']
+
+
+    def as_list(self):
+        return [self.name, self.url, self.format, self.recent_downloads, self.total_downloads]
 
 
     def __repr__(self):

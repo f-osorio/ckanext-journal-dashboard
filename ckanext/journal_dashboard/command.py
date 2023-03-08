@@ -38,7 +38,7 @@ min_args = 3
 def gather_data(journal):
     org = h.get_org(journal)
     packages = org.packages
-    packages = sorted(packages, key=lambda x: x.views, reverse=True)
+    packages = sorted(packages, key=lambda x: x.total_views, reverse=True)
 
 
     num_resources = sum([len(p.resources) for p in packages])
@@ -52,11 +52,11 @@ def gather_data(journal):
                 [len(packages), num_resources, views_total, downloads_total]]
 
     for package in packages:
-        views_total += package.views
-        views_monthly += package.previous_month_views
+        views_total += package.total_views
+        views_monthly += package.recent_views
         for resource in package.resources:
             downloads_total += resource.total_downloads
-            downloads_monthly += resource.previous_month_downloads
+            downloads_monthly += resource.recent_downloads
 
     data = {
                 'prefix': config.get('ckan.site_url'),
@@ -81,12 +81,12 @@ def create_main_text(packages):
     resource_string_link = u'\t{resource}\n'
 
     for package in packages:
-        out += dataset_string.format(dataset=package.name, views=package.views)
+        out += dataset_string.format(dataset=package.name, views=package.total_views)
         if len(package.resources) > 0:
             out += 'Resources:\n'
             for resource in package.resources:
                 if resource.total_downloads >= 0:
-                    out += resource_string.format(resource=resource.name or resource.url, days=resource.previous_month_downloads, total=resource.total_downloads)
+                    out += resource_string.format(resource=resource.name or resource.url, days=resource.recent_downloads, total=resource.total_downloads)
                 else:
                     out += resource_string_link.format(resource=resource.url)
         else:

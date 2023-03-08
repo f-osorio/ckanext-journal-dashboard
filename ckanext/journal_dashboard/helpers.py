@@ -37,12 +37,7 @@ def dashboard_read(context, data_dict=None):
 
 
 def get_org(id, source='cmd'):
-    print('Getting - get_org')
     org = jc.Organization(id, source)
-    #print(org)
-    #print(org.resources.keys())
-    print(f'!!!!!!!!!! {org.packages}')
-    print('Finished - get_org')
     return org
 
 
@@ -72,3 +67,24 @@ def create_table(data):
 
 def get_data(id):
     return jc.Dataset(id)
+
+""" query to generate reports into a CSV file for the year 2021
+COPY (select g.title as journal, p.name as package, r.name as resource, r.url as resource_url,
+    CASE when ts.running_total is NULL then 0 else ts.running_total END as running_total,
+    CASE when ts.count is NULL then 0 else ts.count END as count,
+    CASE when ts.tracking_date is NULL then '1900-01-01'::date else ts.tracking_date END as tracking_date,
+    r.id as resource_id, r.format
+from "group" as g
+join package as p
+    on p.owner_org = g.id
+join resource as r
+    on r.package_id = p.id
+left join tracking_summary as ts
+    on ts.url ILIKE '%%resource/' || r.id ||'/download/' || r.url
+where g.id = 'journal_id'
+    and p.state = 'active'
+    and r.state != 'deleted'
+    and tracking_date >= '2021-01-01' and tracking_date < '2021-12-31'
+ORDER BY p.name, r.name, ts.tracking_date)
+TO '/tmp/ger.csv' With CSV DELIMITER ',' HEADER;
+"""
