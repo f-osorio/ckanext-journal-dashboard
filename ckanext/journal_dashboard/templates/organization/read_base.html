@@ -2,9 +2,8 @@
 
 {% block content_primary_nav %}
     {% set id = h.get_id_from_url(request.url).split('?')[0] %}
-    {# group_dict.name #}
     {{ h.build_nav_icon('journals.read', _('Datasets'), id=id, icon='sitemap') }}
-    {{ h.build_nav_icon('journals.activity', _('Activity Stream'), id=id, icon='clock-o') }}
+    {{ h.build_nav_icon('activity.group_activity', _('Activity Stream'), id=id, icon='clock-o') }}
     {{ h.build_nav_icon('journals.about', _('About'), id=id, icon='info-circle') }}
 
     {% if h.check_access('dashboard_read') %}
